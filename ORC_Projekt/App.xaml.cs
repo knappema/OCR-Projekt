@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Windows;
+using ORC_Projekt.View;
 
 namespace ORC_Projekt
 {
@@ -12,5 +13,10 @@ namespace ORC_Projekt
     /// </summary>
     public partial class App : Application
     {
+        private void OnStartup(object sender, StartupEventArgs e)
+        {
+            var mainView = new MainWindow();
+            mainView.Show();
+        }
     }
 }

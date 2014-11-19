@@ -11,8 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ORC_Projekt.ViewModel;
 
-namespace ORC_Projekt
+namespace ORC_Projekt.View
 {
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
@@ -22,6 +23,7 @@ namespace ORC_Projekt
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainWindowViewModel();
         }
     }
 }
