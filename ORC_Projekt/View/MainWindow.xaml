@@ -1,32 +1,67 @@
 ﻿<Window x:Class="ORC_Projekt.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="400" Width="600">
+        Title="MainWindow" Height="800" Width="1200">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="250*" />
-            <RowDefinition Height="111*" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="130" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Grid.Row="0">
-            <Label Content="Original Image" HorizontalAlignment="Center"/>
-            <Image Height="150" HorizontalAlignment="Center" Name="OriginalImage" VerticalAlignment="Top" Width="200" />
-            <Button Name="SelectFile" Content="SelectImage" Width="100" Margin="5" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Grid.Row="0">
-            <Label Content="Current Image" HorizontalAlignment="Center"/>
-            <Image Height="150" HorizontalAlignment="Center" Name="CurrentImage" VerticalAlignment="Top" Width="200" />
-        </StackPanel>
-        <Grid Grid.ColumnSpan="2" Grid.Row="1">
+        <DockPanel Grid.Column="0" 
+                    Grid.Row="0">
+            <Label Content="Original Image" 
+                   DockPanel.Dock="Top"
+                   HorizontalAlignment="Center"/>
+            <Border BorderThickness="1"
+                    BorderBrush="Black">
+                <Image Source="{Binding OriginalImage}" 
+                   Height="Auto" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Width="Auto" />
+            </Border>
+        </DockPanel>
+        <DockPanel Grid.Column="1" 
+                    Grid.Row="0">
+            <Label Content="Current Image" 
+                   DockPanel.Dock="Top"
+                   HorizontalAlignment="Center"/>
+            <Border BorderThickness="1"
+                    BorderBrush="Black">
+                <Image Source="{Binding CurrentImage}"
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Height="Auto" 
+                   Width="Auto" />
+            </Border>
+        </DockPanel>
+        <Button Content="SelectImage" 
+                Command="{Binding SelectFileCommand}" 
+                Width="100" 
+                Margin="5" 
+                Grid.Row="1"
+                Grid.Column="0"/>
+        <Grid Grid.ColumnSpan="2" 
+              Grid.Row="2">
             <StackPanel>
-                <Button Content="Start Process" Width="150" Height="30"/>
-                <StackPanel Margin="100, 10">
+                <Button Content="Start Process" 
+                        Command="{Binding StartOcrCommand}" 
+                        Width="150" 
+                        Height="30"/>
+                <StackPanel Margin="0, 10"
+                            Width="200">
                     <Label Content="Result Text"/>
-                    <Border BorderThickness="1" BorderBrush="Black">
-                        <TextBlock Name="ResultText" Height="20" TextAlignment="Center"/>
+                    <Border BorderThickness="1"
+                            BorderBrush="Black">
+                        <TextBlock Text="{Binding ResultText}" 
+                                   FontSize="24"
+                                   Height="40" 
+                                   TextAlignment="Center" />
                     </Border>
                 </StackPanel>
             </StackPanel>
