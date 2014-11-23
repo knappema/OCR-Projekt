@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Threading;
 
 namespace ORC_Projekt.BL
 {
@@ -94,7 +95,10 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void PreProcessing()
         {
-            CurrentImage = Binarization(new Bitmap(CurrentImage), 128);
+            CurrentImage = BinarizationWrapper.Binarize(CurrentImage);
+            ResultText = "Binary Image";
+            CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
+            ResultText = "Thinned Image";
         }
 
 
@@ -113,28 +117,7 @@ namespace ORC_Projekt.BL
         {
         }
 
-        private Bitmap Binarization(Bitmap Bmp, byte threshold)
-        {
-            int rgb;
-            Color c;
-
-            for (int y = 0; y < Bmp.Height; y++)
-                for (int x = 0; x < Bmp.Width; x++)
-                {
-                    c = Bmp.GetPixel(x, y);
-                    rgb = (int)((c.R + c.G + c.B) / 3);
-                    if (rgb < threshold)
-                    {
-                        rgb = 0;
-                    }
-                    else
-                    {
-                        rgb = 255;
-                    }
-                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
-                }
-            return Bmp;
-        }
+       
         #endregion
     }
 }
