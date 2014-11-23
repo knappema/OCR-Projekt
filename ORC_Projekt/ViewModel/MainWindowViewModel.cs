@@ -25,6 +25,11 @@ namespace ORC_Projekt.ViewModel
         {
             _selectFileCommand = new RelayCommand(ExecuteSelectFile, CanExecuteSelectFile);
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
+
+            //test can be removed
+            _ocrManager = new OcrManager(@"..\..\ExamplePics\4_800x800.png");
+            _ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
+            OnPropertyChanged("OriginalImage");
         }
 
         #region Properties
@@ -52,10 +57,12 @@ namespace ORC_Projekt.ViewModel
                 if (_ocrManager != null)
                 {
                     Bitmap bitmap = _ocrManager.CurrentImage;
-
-                    BitmapSource source = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(),
-                        IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromWidthAndHeight(bitmap.Width, bitmap.Height));
-                    return source;
+                    if (bitmap != null)
+                    {
+                        BitmapSource source = Imaging.CreateBitmapSourceFromHBitmap(bitmap.GetHbitmap(),
+                            IntPtr.Zero, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromWidthAndHeight(bitmap.Width, bitmap.Height));
+                        return source;
+                    }
                 }
                 return null;
             }
