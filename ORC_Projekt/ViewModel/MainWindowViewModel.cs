@@ -27,7 +27,7 @@ namespace ORC_Projekt.ViewModel
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
 
             //test can be removed
-            _ocrManager = new OcrManager(@"..\..\ExamplePics\4_20x20.png");
+            _ocrManager = new OcrManager(@"..\..\ExamplePics\4_800x800.png");
             _ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
             OnPropertyChanged("OriginalImage");
         }

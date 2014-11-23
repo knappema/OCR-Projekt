@@ -13,7 +13,7 @@ namespace ORC_Projekt.BL.Ocr
     {
         private Bitmap _inputImage;
         private Bitmap _currentImage;
-        private byte[,] _currentDistanceMap;
+        private uint[,] _currentDistanceMap;
 
         #region Properties
 
@@ -33,10 +33,10 @@ namespace ORC_Projekt.BL.Ocr
         {
             _inputImage = (Bitmap)binaryImage.Clone();
             _currentImage = (Bitmap)binaryImage.Clone();
-            _currentDistanceMap = new byte[_inputImage.Width, _inputImage.Height];
+            _currentDistanceMap = new uint[_inputImage.Width, _inputImage.Height];
         }
 
-        public byte[,] start()
+        public uint[,] start()
         {
             DistanceTransformation();
             return _currentDistanceMap;
@@ -57,12 +57,12 @@ namespace ORC_Projekt.BL.Ocr
         }
 
 
-        private byte[,] CreateDistanceMap(Bitmap bitmap)
+        private uint[,] CreateDistanceMap(Bitmap bitmap)
         {
             return GetGetDistanceMapFromBitmap(bitmap, GetDistanceMap);
         }
 
-        private byte GetDistanceMap(int x, int y, Bitmap bitmap)
+        private uint GetDistanceMap(int x, int y, Bitmap bitmap)
         {
             Color pixel = bitmap.GetPixel(x, y);
             int pixelValue = pixel.ToArgb();
@@ -79,7 +79,13 @@ namespace ORC_Projekt.BL.Ocr
                 throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", v1));
             }
 
-            return Convert.ToByte(v1);
+            uint result = uint.MaxValue;
+            if (v1 == 0)
+            {
+                result = 0;
+            }
+
+            return result;
         }
 
         private bool AreDifferent(int v1, int v2, int v3)
@@ -88,50 +94,32 @@ namespace ORC_Projekt.BL.Ocr
         }
 
 
-        private void UpdateCurrentBitmap(byte[,] map)
+        private void UpdateCurrentBitmap(uint[,] map)
         {
             ForeachPixel(_currentImage, map, DistanceToBitmap);
         }
 
-        private Color DistanceToBitmap(int x, int y, Bitmap bitmap, byte[,] distanceMap, byte maxValue)
+        private Color DistanceToBitmap(int x, int y, Bitmap bitmap, uint[,] distanceMap, uint maxValue)
         {
             int pixelValue = pixelValueFromDistance(distanceMap[x, y], maxValue);
-            // colors 
-            //int resutlPixelValue = (int)(256 / (double)maxValue * pixelValue);
             Color newColor = Color.FromArgb(pixelValue);
             return newColor;
         }
 
-        private int pixelValueFromDistance(int distance, byte maxValue)
+        private int pixelValueFromDistance(uint distance, uint maxValue)
         {
-            if (distance > 0xff)
+            if (distance > uint.MaxValue)
             {
                 throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", distance));
             }
             int pixelValue;
 
-            distance = (int)(0xff / (double)maxValue * distance);
+            byte byteDistance = (byte)(0xff / (double)maxValue * distance);
 
             pixelValue = unchecked((int)0xFF000000);
-            pixelValue += distance;
-            pixelValue += distance << 8;
-            pixelValue += distance << 16;
-
-            return pixelValue;
-        }
-
-        private int pixelGreyValueFromDistance(int distance)
-        {
-            if (distance > 0xff)
-            {
-                throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", distance));
-            }
-            int pixelValue;
-
-            pixelValue = unchecked((int)0xFF000000);
-            pixelValue += distance;
-            pixelValue += distance << 8;
-            pixelValue += distance << 16;
+            pixelValue += byteDistance;
+            pixelValue += byteDistance << 8;
+            pixelValue += byteDistance << 16;
 
             return pixelValue;
         }
@@ -148,9 +136,9 @@ namespace ORC_Projekt.BL.Ocr
             }
         }
 
-        private void ForeachPixel(Bitmap bitmap, byte[,] distanceMap, Func<int, int, Bitmap, byte[,], byte, Color> pixelModification)
+        private void ForeachPixel(Bitmap bitmap, uint[,] distanceMap, Func<int, int, Bitmap, uint[,], uint, Color> pixelModification)
         {
-            byte maxValue = 0;
+            uint maxValue = 0;
             for (int x = 0; x < distanceMap.GetLength(0); x++)
             {
                 for (int y = 0; y < distanceMap.GetLength(1); y++)
@@ -168,7 +156,7 @@ namespace ORC_Projekt.BL.Ocr
             }
         }
 
-        private void ForeachPixel(byte[,] distanceMap, Func<int, int, byte[,], byte> pixelModification)
+        private void ForeachPixel(uint[,] distanceMap, Func<int, int, uint[,], uint> pixelModification)
         {
             for (int x = 0; x < distanceMap.GetLength(0); x++)
             {
@@ -179,7 +167,7 @@ namespace ORC_Projekt.BL.Ocr
             }
         }
 
-        private void ForeachPixelReverse(byte[,] distanceMap, Func<int, int, byte[,], byte> pixelModification)
+        private void ForeachPixelReverse(uint[,] distanceMap, Func<int, int, uint[,], uint> pixelModification)
         {
             for (int x = distanceMap.GetLength(0) - 1; x >= 0; x--)
             {
@@ -190,9 +178,9 @@ namespace ORC_Projekt.BL.Ocr
             }
         }
 
-        private byte[,] GetGetDistanceMapFromBitmap(Bitmap bitmap, Func<int, int, Bitmap, byte> pixelModification)
+        private uint[,] GetGetDistanceMapFromBitmap(Bitmap bitmap, Func<int, int, Bitmap, uint> pixelModification)
         {
-            var map = new byte[bitmap.Width, bitmap.Height];
+            var map = new uint[bitmap.Width, bitmap.Height];
             for (int x = 0; x < bitmap.Width; x++)
             {
                 for (int y = 0; y < bitmap.Height; y++)
@@ -209,45 +197,45 @@ namespace ORC_Projekt.BL.Ocr
             ForeachPixel(_currentDistanceMap, CalcMlMatrixValue);
         }
 
-        private byte CalcMlMatrixValue(int x, int y, byte[,] distanceMap)
+        private uint CalcMlMatrixValue(int x, int y, uint[,] distanceMap)
         {
-            byte max = 0xff;
+            uint max = uint.MaxValue;
             if (distanceMap[x, y] > 0)
             {
-                byte d1 = max;
-                byte d2 = max;
-                byte d3 = max;
-                byte d4 = max;
+                uint d1 = max;
+                uint d2 = max;
+                uint d3 = max;
+                uint d4 = max;
                 if (x - 1 >= 0)
                 {
-                    int temp = 1 + distanceMap[x - 1, y];
+                    ulong temp = 1 + (ulong)distanceMap[x - 1, y];
                     if (temp <= max)
                     {
-                        d1 = (byte)temp;
+                        d1 = (uint)temp;
                     }
                 }
                 if (x - 1 >= 0 && y - 1 >=0)
                 {
-                    int temp = 2 + distanceMap[x - 1, y - 1];
+                    ulong temp = 2 + (ulong)distanceMap[x - 1, y - 1];
                     if (temp <= max)
                     {
-                        d2 = (byte)temp;
+                        d2 = (uint)temp;
                     }
                 }
                 if (y - 1 >= 0)
                 {
-                    int temp = 1 + distanceMap[x, y - 1];
+                    ulong temp = 1 + (ulong)distanceMap[x, y - 1];
                     if (temp <= max)
                     {
-                        d3 = (byte)temp;
+                        d3 = (uint)temp;
                     }
                 }
                 if (x + 1 < distanceMap.GetLength(0) && y - 1 >= 0)
                 {
-                    int temp = 2 + distanceMap[x + 1, y - 1];
+                    ulong temp = 2 + (ulong)distanceMap[x + 1, y - 1];
                     if (temp <= max)
                     {
-                        d4 = (byte)temp;
+                        d4 = (uint)temp;
                     }
                 }
                 return Min(d1, d2, d3, d4);
@@ -260,45 +248,45 @@ namespace ORC_Projekt.BL.Ocr
             ForeachPixelReverse(_currentDistanceMap, CalcMrMatrixValue);
         }
 
-        private byte CalcMrMatrixValue(int x, int y, byte[,] distanceMap)
+        private uint CalcMrMatrixValue(int x, int y, uint[,] distanceMap)
         {
-            byte max = 0xff;
+            uint max = uint.MaxValue;
             if (distanceMap[x, y] > 0)
             {
-                byte d1 = max;
-                byte d2 = max;
-                byte d3 = max;
-                byte d4 = max;
+                uint d1 = max;
+                uint d2 = max;
+                uint d3 = max;
+                uint d4 = max;
                 if (x + 1 < distanceMap.GetLength(0))
                 {
-                    int temp = 1 + distanceMap[x + 1, y];
+                    ulong temp = 1 + (ulong)distanceMap[x + 1, y];
                     if (temp <= max)
                     {
-                        d1 = (byte)temp;
+                        d1 = (uint)temp;
                     }
                 }
                 if (x + 1 < distanceMap.GetLength(0) && y + 1 < distanceMap.GetLength(1))
                 {
-                    int temp = 2 + distanceMap[x + 1, y + 1];
+                    ulong temp = 2 + (ulong)distanceMap[x + 1, y + 1];
                     if (temp <= max)
                     {
-                        d2 = (byte)temp;
+                        d2 = (uint)temp;
                     }
                 }
                 if (y + 1 < distanceMap.GetLength(1))
                 {
-                    int temp = 1 + distanceMap[x, y + 1];
+                    ulong temp = 1 + (ulong)distanceMap[x, y + 1];
                     if (temp <= max)
                     {
-                        d3 = (byte)temp;
+                        d3 = (uint)temp;
                     }
                 }
                 if (x - 1 >= 0 && y + 1 < distanceMap.GetLength(1))
                 {
-                    int temp = 2 + distanceMap[x - 1, y + 1];
+                    ulong temp = 2 + (ulong)distanceMap[x - 1, y + 1];
                     if (temp <= max)
                     {
-                        d4 = (byte)temp;
+                        d4 = (uint)temp;
                     }
                 }
                 return Min(distanceMap[x, y], d1, d2, d3, d4);
@@ -306,10 +294,10 @@ namespace ORC_Projekt.BL.Ocr
             return distanceMap[x, y];
         }
 
-        private byte Min(params byte[] values)
+        private uint Min(params uint[] values)
         {
-            byte min = 0xff;
-            foreach (byte value in values)
+            uint min = uint.MaxValue;
+            foreach (uint value in values)
             {
                 min = Math.Min(min, value);
             }
