@@ -44,9 +44,11 @@ namespace ORC_Projekt.BL
                     {
                         rgb = 255;
                     }
-                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));                 
+
                 }
             return Bmp;
         }
+
     }
 }

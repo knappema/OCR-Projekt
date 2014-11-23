@@ -109,9 +109,9 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void Ocr()
         {
-            var dtc = new DistanceTransformationChamfer(_originalImage);
-            var distanceMap = dtc.start();
-            CurrentImage = dtc.CurrentImage;
+            //var dtc = new DistanceTransformationChamfer(_originalImage);
+            //var distanceMap = dtc.start();
+            //CurrentImage = dtc.CurrentImage;
         }
 
         /// <summary>
