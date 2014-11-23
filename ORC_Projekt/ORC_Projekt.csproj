@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="BL\OcrManager.cs" />
     <Compile Include="BL\OcrManagerBase.cs" />
+    <Compile Include="BL\Ocr\DistanceTransformationChamfer.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using ORC_Projekt.BL.Ocr;
 
 namespace ORC_Projekt.BL
 {
@@ -101,6 +102,9 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void Ocr()
         {
+            var dtc = new DistanceTransformationChamfer(_originalImage);
+            var distanceMap = dtc.start();
+            CurrentImage = dtc.CurrentImage;
         }
 
         /// <summary>
