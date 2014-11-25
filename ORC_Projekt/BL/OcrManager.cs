@@ -98,8 +98,10 @@ namespace ORC_Projekt.BL
         {
             CurrentImage = BinarizationWrapper.Binarize(CurrentImage);
             ResultText = "Binary Image";
-            CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
+            CurrentImage = ThinningWrapper.Thin(CurrentImage);
             ResultText = "Thinned Image";
+            CurrentImage = CharacterIsolation.VisualizeBoxing(CurrentImage);
+            ResultText = "Boxed";
         }
 
 

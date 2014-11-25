@@ -8,7 +8,7 @@ namespace ORC_Projekt.BL
 {
     class HelperFunctions
     {
-        public static int GetRGBFromColor(Color c)
+        public static int GetGrayScaleFromColor(Color c)
         {
             return (int)((c.R + c.G + c.B) / 3);
         }
