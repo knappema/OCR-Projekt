@@ -101,6 +101,8 @@ namespace ORC_Projekt.BL
             ResultText = "Binary Image";
             CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
             ResultText = "Thinned Image";
+            //CurrentImage = CharacterIsolation.VisualizeBoxing(new Bitmap(CurrentImage));
+            //ResultText = "Boxed";
         }
 
 
@@ -113,6 +115,7 @@ namespace ORC_Projekt.BL
             var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage));
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
+
         }
 
         /// <summary>

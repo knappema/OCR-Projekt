@@ -18,7 +18,7 @@ namespace ORC_Projekt.BL
             for (int y = 0; y < Bmp.Height; y++)
                 for (int x = 0; x < Bmp.Width; x++)
                 {
-                    rgb = HelperFunctions.GetRGBFromColor(Bmp.GetPixel(x, y));
+                    rgb = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
                     sum += rgb;
                     amoutOfPixels++;
                 }
@@ -35,7 +35,7 @@ namespace ORC_Projekt.BL
             for (int y = 0; y < Bmp.Height; y++)
                 for (int x = 0; x < Bmp.Width; x++)
                 {
-                    rgb = rgb = HelperFunctions.GetRGBFromColor(Bmp.GetPixel(x, y));
+                    rgb = rgb = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
                     if (rgb < threshold)
                     {
                         rgb = 0;
@@ -44,9 +44,11 @@ namespace ORC_Projekt.BL
                     {
                         rgb = 255;
                     }
-                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));
+                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));                 
+
                 }
             return Bmp;
         }
+
     }
 }

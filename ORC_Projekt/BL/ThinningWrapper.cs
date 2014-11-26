@@ -10,6 +10,7 @@ namespace ORC_Projekt.BL
     {
         public static Bitmap Thin(Bitmap img)
         {
+            img = new Bitmap(img);
             bool[][] t = Image2Bool(img);
             t = ZhangSuenThinning(t);
             return Bool2Image(t);
@@ -25,7 +26,7 @@ namespace ORC_Projekt.BL
                 s[y] = new bool[bmp.Width];
                 for (int x = 0; x < bmp.Width; x++)
                 {
-                    rgb = HelperFunctions.GetRGBFromColor(bmp.GetPixel(x, y));
+                    rgb = HelperFunctions.GetGrayScaleFromColor(bmp.GetPixel(x, y));
                     s[y][x] = (rgb == 0);
                 }
             }
