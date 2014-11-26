@@ -24,6 +24,7 @@ namespace ORC_Projekt.BL
         public OcrManager(string fileName)
         {
             _originalImage = new Bitmap(fileName);
+            CurrentImage = new Bitmap(fileName);
         }
 
         #region Properties
@@ -78,7 +79,6 @@ namespace ORC_Projekt.BL
         public void Start()
         {
             //test
-            CurrentImage = OriginalImage;
             ResultText = "Cheese";
 
 
@@ -96,7 +96,8 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void PreProcessing()
         {
-            CurrentImage = BinarizationWrapper.Binarize(CurrentImage);
+
+            CurrentImage = BinarizationWrapper.Binarize(new Bitmap(CurrentImage));
             ResultText = "Binary Image";
             CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
             ResultText = "Thinned Image";
@@ -109,7 +110,7 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void Ocr()
         {
-            var dtc = new DistanceTransformationChamfer(_originalImage);
+            var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage));
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
         }
