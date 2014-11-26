@@ -70,6 +70,7 @@
     <Compile Include="BL\HelperFunctions.cs" />
     <Compile Include="BL\OcrManager.cs" />
     <Compile Include="BL\OcrManagerBase.cs" />
+    <Compile Include="BL\Ocr\ChamferMatching.cs" />
     <Compile Include="BL\ThinningWrapper.cs" />
     <Compile Include="BL\Ocr\DistanceTransformationChamfer.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
