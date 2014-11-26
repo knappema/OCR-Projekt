@@ -20,9 +20,11 @@ namespace ORC_Projekt.BL
         /// </summary>
         private Bitmap _currentWorkingImage;
         private string _resultText;
+        
 
-        public OcrManager(string fileName)
+        public OcrManager(string fileName, ConfigModel config)
         {
+            Config = config;
             _originalImage = new Bitmap(fileName);
             CurrentImage = new Bitmap(fileName);
         }
@@ -69,6 +71,9 @@ namespace ORC_Projekt.BL
             }
         }
 
+        public ConfigModel Config { get; set; }
+
+
         #endregion
 
         #region Publics
@@ -78,10 +83,7 @@ namespace ORC_Projekt.BL
         /// </summary>
         public void Start()
         {
-            //test
-            ResultText = "Cheese";
-
-
+            Reset();
             PreProcessing();
             Ocr();
             PostProcessing();
@@ -90,6 +92,11 @@ namespace ORC_Projekt.BL
         #endregion
 
         #region Privates
+
+        private void Reset()
+        {
+            CurrentImage = new Bitmap(OriginalImage);
+        }
 
         /// <summary>
         /// All methods for pre-processing
@@ -112,7 +119,7 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void Ocr()
         {
-            var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage));
+            var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage), Config.ShowDistanceTransformationColored);
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
 

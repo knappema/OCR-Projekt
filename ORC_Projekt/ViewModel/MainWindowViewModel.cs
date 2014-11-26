@@ -19,17 +19,14 @@ namespace ORC_Projekt.ViewModel
     {
         private readonly ICommand _selectFileCommand;
         private readonly ICommand _startOcrCommand;
+        private readonly ConfigModel _config;
         private OcrManager _ocrManager;
 
         public MainWindowViewModel()
         {
             _selectFileCommand = new RelayCommand(ExecuteSelectFile, CanExecuteSelectFile);
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
-
-            //test can be removed
-            //_ocrManager = new OcrManager(@"..\..\ExamplePics\4_800x800.png");
-            //_ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
-            //OnPropertyChanged("OriginalImage");
+            _config = new ConfigModel();
         }
 
         #region Properties
@@ -79,7 +76,28 @@ namespace ORC_Projekt.ViewModel
                 return String.Empty;
             }
         }
-            
+
+        public bool IsColoredDistanceTransformationSelected
+        {
+            get
+            {
+                return _config.ShowDistanceTransformationColored;
+            }
+            set
+            {
+                if (_config.ShowDistanceTransformationColored != value)
+                {
+                    _config.ShowDistanceTransformationColored = value;
+                    OnPropertyChanged("IsSelected");
+
+                    if (_ocrManager != null)
+                    {
+                        _ocrManager.Config = _config;
+                    }
+                }
+            }
+        }
+
 
 
         #endregion
@@ -157,7 +175,7 @@ namespace ORC_Projekt.ViewModel
         private void createOcrManager(string fileName)
         {
             _ocrManager = null;
-            _ocrManager = new OcrManager(fileName);
+            _ocrManager = new OcrManager(fileName, _config);
             _ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
             OnPropertyChanged("OriginalImage");
         }

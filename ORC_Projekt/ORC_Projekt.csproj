@@ -67,6 +67,7 @@
     </Compile>
     <Compile Include="BL\BinarizationWrapper.cs" />
     <Compile Include="BL\CharacterIsolation.cs" />
+    <Compile Include="BL\ConfigModel.cs" />
     <Compile Include="BL\HelperFunctions.cs" />
     <Compile Include="BL\OcrManager.cs" />
     <Compile Include="BL\OcrManagerBase.cs" />

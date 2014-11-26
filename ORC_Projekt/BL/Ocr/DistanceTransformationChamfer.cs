@@ -14,6 +14,21 @@ namespace ORC_Projekt.BL.Ocr
         private Bitmap _inputImage;
         private Bitmap _currentImage;
         private uint[,] _currentDistanceMap;
+        private bool _showColored = false;
+
+        public DistanceTransformationChamfer(Bitmap binaryImage)
+        {
+            _inputImage = binaryImage;
+            _currentImage = new Bitmap(binaryImage);
+            _currentDistanceMap = new uint[_inputImage.Width, _inputImage.Height];
+        }
+
+        public DistanceTransformationChamfer(Bitmap binaryImage, bool showColored)
+            : this(binaryImage)
+        {
+            _showColored = showColored;
+        }
+
 
         #region Properties
 
@@ -27,14 +42,8 @@ namespace ORC_Projekt.BL.Ocr
 
         #endregion
 
-        #region Publics
 
-        public DistanceTransformationChamfer(Bitmap binaryImage)
-        {
-            _inputImage = binaryImage;
-            _currentImage = new Bitmap(binaryImage);
-            _currentDistanceMap = new uint[_inputImage.Width, _inputImage.Height];
-        }
+        #region Publics
 
         public uint[,] start()
         {
@@ -43,6 +52,7 @@ namespace ORC_Projekt.BL.Ocr
         }
 
         #endregion
+
 
         #region Privates
 
@@ -101,7 +111,16 @@ namespace ORC_Projekt.BL.Ocr
 
         private Color DistanceToBitmap(int x, int y, Bitmap bitmap, uint[,] distanceMap, uint maxValue)
         {
-            int pixelValue = pixelValueFromDistance(distanceMap[x, y], maxValue);
+            int pixelValue;
+            if (_showColored)
+            {
+                pixelValue = coloredPixelValueFromDistance(distanceMap[x, y], maxValue);
+            }
+            else
+            {
+                pixelValue = pixelValueFromDistance(distanceMap[x, y], maxValue);
+            }
+
             Color newColor = Color.FromArgb(pixelValue);
             return newColor;
         }
@@ -126,6 +145,52 @@ namespace ORC_Projekt.BL.Ocr
             pixelValue += byteDistance << 16;
 
             return pixelValue;
+        }
+
+        private int coloredPixelValueFromDistance(uint distance, uint maxValue)
+        {
+            if (distance > uint.MaxValue)
+            {
+                throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", distance));
+            }
+            uint pixelValue;
+
+            uint byteDistance = 0;
+            pixelValue = unchecked((uint)0xFF000000);
+
+            if (distance != 0)
+            {
+                byteDistance = (uint)(3 * 256 / (double)maxValue * distance);
+                if (byteDistance < 256)
+                {
+                    pixelValue += 0xff;
+                    pixelValue += (0xff - byteDistance) << 8;
+                    pixelValue += 0 << 16;
+                }
+                else if (byteDistance < 2 * 256)
+                {
+                    byteDistance -= 256;
+                    pixelValue += 0xff;
+                    pixelValue += 0 << 8;
+                    pixelValue += byteDistance << 16;
+                }
+                else
+                {
+                    byteDistance -= 2 * 256;
+                    pixelValue += (0xff - byteDistance);
+                    pixelValue += 0 << 8;
+                    pixelValue += 0xff << 16;
+                }
+            }
+            else
+            {
+                pixelValue += byteDistance;
+                pixelValue += byteDistance << 8;
+                pixelValue += byteDistance << 16;
+            }
+            
+
+            return (int)pixelValue; 
         }
             
 
