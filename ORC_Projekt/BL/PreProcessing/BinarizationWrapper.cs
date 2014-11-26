@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OtsuThreshold;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -8,44 +9,52 @@ namespace ORC_Projekt.BL.PreProcessing
 {
     class BinarizationWrapper
     {
-        private static byte EstablishThreshold(Bitmap Bmp)
+        /// <summary>
+        /// Establish a threshold by taking the average gray scale values of all pixels
+        /// </summary>
+        private static int EstablishThreshold(Bitmap Bmp)
         {
-            int rgb;
+            int grayScale;
 
-            int sum = 0;
+            int grayScaleTotal = 0;
             int amoutOfPixels = 0;
 
             for (int y = 0; y < Bmp.Height; y++)
                 for (int x = 0; x < Bmp.Width; x++)
                 {
-                    rgb = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
-                    sum += rgb;
+                    grayScale = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
+                    grayScaleTotal += grayScale;
                     amoutOfPixels++;
                 }
-            return (byte)(sum / amoutOfPixels);
+            return (int)(grayScaleTotal / amoutOfPixels);
         }
 
+        /// <summary>
+        /// Binarize the image (all pixels are either 0 or 255)
+        /// </summary>
         public static Bitmap Binarize(Bitmap Bmp)
         {
             Bmp = new Bitmap(Bmp);
-            byte threshold = EstablishThreshold(Bmp);
+            //int threshold = EstablishThreshold(Bmp);
+            Otsu o = new Otsu();
+            int threshold = o.getOtsuThreshold(Bmp);
 
-            int rgb;
+            int grayScale;
 
             for (int y = 0; y < Bmp.Height; y++)
                 for (int x = 0; x < Bmp.Width; x++)
                 {
-                    rgb = rgb = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
-                    if (rgb < threshold)
+                    grayScale = grayScale = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
+                    if (grayScale < threshold)
                     {
-                        rgb = 0;
+                        grayScale = 0;
                     }
                     else
                     {
-                        rgb = 255;
+                        grayScale = 255;
                     }
-                    Bmp.SetPixel(x, y, Color.FromArgb(rgb, rgb, rgb));                 
 
+                    Bmp.SetPixel(x, y, Color.FromArgb(grayScale, grayScale, grayScale));
                 }
             return Bmp;
         }

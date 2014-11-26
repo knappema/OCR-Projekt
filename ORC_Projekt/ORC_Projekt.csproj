@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -66,12 +67,13 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BL\PreProcessing\BinarizationWrapper.cs" />
-    <Compile Include="BL\PreProcessing\CharacterIsolation.cs" />
+    <Compile Include="BL\PreProcessing\CharacterIsolationWrapper.cs" />
     <Compile Include="BL\ConfigModel.cs" />
     <Compile Include="BL\PreProcessing\HelperFunctions.cs" />
     <Compile Include="BL\OcrManager.cs" />
     <Compile Include="BL\OcrManagerBase.cs" />
     <Compile Include="BL\Ocr\ChamferMatching.cs" />
+    <Compile Include="BL\PreProcessing\Otsu.cs" />
     <Compile Include="BL\PreProcessing\ThinningWrapper.cs" />
     <Compile Include="BL\Ocr\DistanceTransformationChamfer.cs" />
     <Compile Include="Commands\RelayCommand.cs" />

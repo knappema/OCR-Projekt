@@ -8,6 +8,9 @@ namespace ORC_Projekt.BL.PreProcessing
 {
     class ThinningWrapper
     {
+        /// <summary>
+        /// Thin the bitmap. Ideally characters are only 1px wide after this step
+        /// </summary>
         public static Bitmap Thin(Bitmap img)
         {
             img = new Bitmap(img);
@@ -15,9 +18,13 @@ namespace ORC_Projekt.BL.PreProcessing
             t = ZhangSuenThinning(t);
             return Bool2Image(t);
         }
+
+        /// <summary>
+        /// Convert binary image into bool array. For faster computation
+        /// </summary>
         private static bool[][] Image2Bool(Bitmap img)
         {
-            int rgb;
+            int grayScale;
 
             Bitmap bmp = new Bitmap(img);
             bool[][] s = new bool[bmp.Height][];
@@ -26,39 +33,58 @@ namespace ORC_Projekt.BL.PreProcessing
                 s[y] = new bool[bmp.Width];
                 for (int x = 0; x < bmp.Width; x++)
                 {
-                    rgb = HelperFunctions.GetGrayScaleFromColor(bmp.GetPixel(x, y));
-                    s[y][x] = (rgb == 0);
+                    grayScale = HelperFunctions.GetGrayScaleFromColor(bmp.GetPixel(x, y));
+                    s[y][x] = (grayScale == 0);
                 }
             }
             return s;
         }
 
+        /// <summary>
+        /// Convert bool array back into bitmap
+        /// </summary>
         private static Bitmap Bool2Image(bool[][] s)
         {
             Bitmap bmp = new Bitmap(s[0].Length, s.Length);
-            using (Graphics g = Graphics.FromImage(bmp)) g.Clear(Color.White);
             for (int y = 0; y < bmp.Height; y++)
+            {
                 for (int x = 0; x < bmp.Width; x++)
-                    if (s[y][x]) bmp.SetPixel(x, y, Color.FromArgb(0, 0, 0));
-            return (Bitmap)bmp;
+                {
+                    if (s[y][x])
+                    {
+                        bmp.SetPixel(x, y, Color.FromArgb(0, 0, 0));
+                    }
+                    else
+                    {
+                        bmp.SetPixel(x, y, Color.FromArgb(255, 255, 255));
+                    }
+                }
+            }
+            return bmp;
         }
 
+        /// <summary>
+        /// Thin the image represented as a bool array using the Zhang Suen Algorithm (http://rosettacode.org/wiki/Zhang-Suen_thinning_algorithm)
+        /// </summary>
         private static bool[][] ZhangSuenThinning(bool[][] s)
         {
-            bool[][] temp = ArrayClone(s);  // make a deep copy to start.. 
+            bool[][] temp = ArrayClone(s);
             int count = 0;
-            do  // the missing iteration
+            do
             {
                 count = step(1, temp, s);
-                temp = ArrayClone(s);      // ..and on each..
+                temp = ArrayClone(s);
                 count += step(2, temp, s);
-                temp = ArrayClone(s);      // ..call!
+                temp = ArrayClone(s);
             }
-            while (count > 0);
+            while (count > 0); //as long as some pixel changed
 
             return s;
         }
 
+        /// <summary>
+        /// Perform single step (either 1 or 2 ) return the amount of changed pixels
+        /// </summary>
         private static int step(int stepNo, bool[][] temp, bool[][] s)
         {
             int count = 0;
@@ -69,15 +95,17 @@ namespace ORC_Projekt.BL.PreProcessing
                 {
                     if (SuenThinningAlg(a, b, temp, stepNo == 2))
                     {
-                        // still changes happening?
                         if (s[a][b]) count++;
-                        s[a][b] = false;
+                        s[a][b] = false; // set pixel to white
                     }
                 }
             }
             return count;
         }
 
+        /// <summary>
+        /// Check if all 5 conditions are satisfied
+        /// </summary>
         private static bool SuenThinningAlg(int x, int y, bool[][] s, bool even)
         {
             bool p2 = s[x][y - 1];
@@ -120,6 +148,9 @@ namespace ORC_Projekt.BL.PreProcessing
             return false;
         }
 
+        /// <summary>
+        /// Get the amount of transitions from white to black 
+        /// </summary>
         private static int NumberOfZeroToOneTransitionFromP9(int x, int y, bool[][] s)
         {
             bool p2 = s[x][y - 1];
@@ -137,6 +168,10 @@ namespace ORC_Projekt.BL.PreProcessing
                     Convert.ToInt32((!p8 && p9)) + Convert.ToInt32((!p9 && p2));
             return A;
         }
+
+        /// <summary>
+        /// Get the amount of black pixel neighbours
+        /// </summary>
         private static int NumberOfNonZeroNeighbors(int x, int y, bool[][] s)
         {
             int count = 0;
@@ -151,7 +186,12 @@ namespace ORC_Projekt.BL.PreProcessing
             return count;
         }
 
+        /// <summary>
+        /// Deep copy of the array
+        /// </summary>
         private static T[][] ArrayClone<T>(T[][] A)
-        { return A.Select(a => a.ToArray()).ToArray(); }
+        {
+            return A.Select(a => a.ToArray()).ToArray();
+        }
     }
 }

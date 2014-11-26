@@ -29,6 +29,7 @@ namespace ORC_Projekt.BL
             Config = config;
             _originalImage = new Bitmap(fileName);
             CurrentImage = new Bitmap(fileName);
+            _currentWorkingImage = CurrentImage;
         }
 
         #region Properties
@@ -120,15 +121,22 @@ namespace ORC_Projekt.BL
         /// <summary>
         /// All methods for pre-processing
         /// </summary>
-        private void PreProcessing()
+        private List<Bitmap> PreProcessing()
         {
 
-            CurrentImage = BinarizationWrapper.Binarize(new Bitmap(CurrentImage));
+            CurrentImage = BinarizationWrapper.Binarize(new Bitmap(_currentWorkingImage));
+            _currentWorkingImage = CurrentImage;
             CurrentStep = "Binary Image";
-            CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
+
+            CurrentImage = ThinningWrapper.Thin(new Bitmap(_currentWorkingImage));
+            _currentWorkingImage = CurrentImage;
             CurrentStep = "Thinned Image";
-            //CurrentImage = CharacterIsolation.VisualizeBoxing(new Bitmap(CurrentImage));
-            //ResultText = "Boxed";
+
+            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(new Bitmap(_currentWorkingImage));
+            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(new Bitmap(_currentWorkingImage));
+            CurrentStep = "Boxed";
+            return chars;
+            return null;
         }
 
 

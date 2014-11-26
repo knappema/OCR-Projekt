@@ -6,8 +6,16 @@ using System.Text;
 
 namespace ORC_Projekt.BL.PreProcessing
 {
-    class CharacterIsolation
+    class CharacterIsolationWrapper
     {
+        /// <summary>
+        /// indivdual images are stored in the harddrive in debug mode
+        /// </summary>
+        private const bool DEBUGMODE = true;
+
+        /// <summary>
+        /// nested class to store the dimentions of the boxes used to identify letters
+        /// </summary>
         private class LetterBox
         {
             public LetterBox(int _x, int _y, int _width, int _height)
@@ -22,26 +30,54 @@ namespace ORC_Projekt.BL.PreProcessing
             public int width;
             public int height;
         }
-        public static Bitmap[] IsolateCharacters(Bitmap input)
-        {
-            AnalyzeImage(input);
-            return null;
 
+        /// <summary>
+        /// return isolated characters in a list of bitmaps
+        /// </summary>
+        public static List<Bitmap> IsolateCharacters(Bitmap input)
+        {
+            List<LetterBox> boxes = AnalyzeImage(input);
+            return getIndividualCharactersFromBitmap(boxes, input);
         }
+
+        /// <summary>
+        /// crops the individual characters, defined by the boxes out of the input image
+        /// </summary>
+        private static List<Bitmap> getIndividualCharactersFromBitmap(List<LetterBox> boxes, Bitmap input)
+        {
+            List<Bitmap> chars = new List<Bitmap>();
+            foreach (LetterBox box in boxes)
+            {
+                Bitmap croppedImage = input.Clone(new System.Drawing.Rectangle(box.x, box.y, box.width, box.height), input.PixelFormat);
+                chars.Add(croppedImage);
+                if (DEBUGMODE)
+                {
+                    croppedImage.Save("character at position x" + box.x.ToString() + "y" + box.y.ToString() + ".png");
+                }
+            }
+            return chars;
+        }
+
+        /// <summary>
+        /// Visualize the boxing process by drawing red squares around individual chars
+        /// </summary>
         public static Bitmap VisualizeBoxing(Bitmap input)
         {
             List<LetterBox> boxes = AnalyzeImage(input);
-            return drawBoxesIntoImage(boxes,input);
+            return drawBoxesIntoImage(boxes, input);
         }
 
+        /// <summary>
+        /// draw red squares with the dimentions of the boxes into the input bitmap
+        /// </summary>
         private static Bitmap drawBoxesIntoImage(List<LetterBox> boxes, Bitmap input)
         {
             input = new Bitmap(input);
             foreach (LetterBox box in boxes)
             {
-                for(int x = box.x; x <= box.x + box.width; x++)
+                for (int x = box.x; x <= box.x + box.width; x++)
                 {
-                    input.SetPixel(x,box.y,Color.Red);
+                    input.SetPixel(x, box.y, Color.Red);
                     input.SetPixel(x, box.y + box.height, Color.Red);
                 }
                 for (int y = box.y; y <= box.y + box.height; y++)
@@ -53,6 +89,10 @@ namespace ORC_Projekt.BL.PreProcessing
             return input;
         }
 
+        /// <summary>
+        /// Analyzes the image and returns a list of boxes marking the dimentions of each character
+        /// The condition for the input image for this to work is that there is only a single line of characters and each character is separated by enough white pixels
+        /// </summary>
         private static List<LetterBox> AnalyzeImage(Bitmap input)
         {
             List<int> xCoordinatesOfWhiteColumns = GetPositionOfCompletelyWhiteColumns(input);
@@ -60,13 +100,22 @@ namespace ORC_Projekt.BL.PreProcessing
             return letterBoxes;
         }
 
+        /// <summary>
+        /// Calculates the letterboxes out of the input image and the position of white columns that seperate each character
+        /// </summary>
         private static List<LetterBox> CalcLetterBoxes(Bitmap input, List<int> xCoordinatesOfWhiteColumns)
         {
             int minLetterWith = 3;
-            int boxOffset = 5;
+            int boxOffset = 10;
             List<LetterBox> boxes = new List<LetterBox>();
 
-            //calcXAndWidth
+            if (!xCoordinatesOfWhiteColumns.Any())
+            {
+                Console.WriteLine("input image does not fit the criteria. No white lines found");
+                return boxes;
+            }
+
+            //calc x postion and width of the box
             int previousX = 0;
             for (int x = 0; x < input.Width; x++)
             {
@@ -80,11 +129,17 @@ namespace ORC_Projekt.BL.PreProcessing
                     }
                     int index = xCoordinatesOfWhiteColumns.IndexOf(previousX);
                     int nextX = xCoordinatesOfWhiteColumns[index + 1];
-                    int width = nextX - x;
 
-                    if(foundLetter)
+                    int width = (nextX - x);
+                    if ((x - boxOffset > 0) && ((nextX + boxOffset) <= input.Width))
                     {
-                        LetterBox box = new LetterBox(x - boxOffset, 0, width + boxOffset, 0);
+                        x = x - boxOffset;
+                        width += 2 * boxOffset;
+                    }
+
+                    if (foundLetter)
+                    {
+                        LetterBox box = new LetterBox(x, 0, width, 0);
                         boxes.Add(box);
                     }
                     x = nextX;
@@ -99,26 +154,36 @@ namespace ORC_Projekt.BL.PreProcessing
                 int x1 = box.x;
                 int x2 = box.x + box.width;
                 int ymax = 0, ymin = input.Height;
-                
-                for(int x = x1; x < x2; x++)
+
+                for (int x = x1; x < x2; x++)
                 {
-                    for(int y=0; y < input.Height ; y++)
+                    for (int y = 0; y < input.Height; y++)
                     {
-                        if(input.GetPixel(x,y).R == 0)
+                        if (input.GetPixel(x, y).R == 0)
                         {
-                            if(y > ymax)
+                            if (y > ymax)
                                 ymax = y;
                             if (y < ymin)
                                 ymin = y;
                         }
                     }
                 }
-                box.y = ymin - boxOffset;
-                box.height = ymax - ymin + boxOffset;
+
+                int height = (ymax - ymin);
+                if ((ymin - boxOffset > 0) && ((ymax + boxOffset) <= input.Height))
+                {
+                    ymin = ymin - boxOffset;
+                    height += 2 * boxOffset;
+                }
+                box.y = ymin;
+                box.height = height;
             }
             return boxes;
         }
 
+        /// <summary>
+        /// return the x coordinates of columns that contain no black pixels
+        /// </summary>
         private static List<int> GetPositionOfCompletelyWhiteColumns(Bitmap input)
         {
             List<int> xCoordinatesOfWhiteColumns = new List<int>();
@@ -128,7 +193,10 @@ namespace ORC_Projekt.BL.PreProcessing
                 for (int y = 0; y < input.Height; y++)
                 {
                     if (input.GetPixel(x, y).R != 255)
+                    {
                         isWhiteColumn = false;
+                        break;
+                    }
                 }
                 if (isWhiteColumn)
                     xCoordinatesOfWhiteColumns.Add(x);
