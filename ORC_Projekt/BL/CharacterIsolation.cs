@@ -36,13 +36,19 @@ namespace ORC_Projekt.BL
 
         private static Bitmap drawBoxesIntoImage(List<LetterBox> boxes, Bitmap input)
         {
-            
+            input = new Bitmap(input);
             foreach (LetterBox box in boxes)
             {
-                Pen myPen = new Pen(System.Drawing.Color.Red, 5);
-                Graphics g = Graphics.FromImage(input);
-                g.DrawRectangle(myPen,box.x,box.y,box.width,box.height);
-                g.Dispose();
+                for(int x = box.x; x <= box.x + box.width; x++)
+                {
+                    input.SetPixel(x,box.y,Color.Red);
+                    input.SetPixel(x, box.y + box.height, Color.Red);
+                }
+                for (int y = box.y; y <= box.y + box.height; y++)
+                {
+                    input.SetPixel(box.x, y, Color.Red);
+                    input.SetPixel(box.x + box.width, y, Color.Red);
+                }
             }
             return input;
         }
@@ -57,6 +63,7 @@ namespace ORC_Projekt.BL
         private static List<LetterBox> CalcLetterBoxes(Bitmap input, List<int> xCoordinatesOfWhiteColumns)
         {
             int minLetterWith = 3;
+            int boxOffset = 5;
             List<LetterBox> boxes = new List<LetterBox>();
 
             //calcXAndWidth
@@ -77,7 +84,7 @@ namespace ORC_Projekt.BL
 
                     if(foundLetter)
                     {
-                        LetterBox box = new LetterBox(x, 0, width, 0);
+                        LetterBox box = new LetterBox(x - boxOffset, 0, width + boxOffset, 0);
                         boxes.Add(box);
                     }
                     x = nextX;
@@ -106,8 +113,8 @@ namespace ORC_Projekt.BL
                         }
                     }
                 }
-                box.y = ymin;
-                box.height = ymax - ymin;
+                box.y = ymin - boxOffset;
+                box.height = ymax - ymin + boxOffset;
             }
             return boxes;
         }
