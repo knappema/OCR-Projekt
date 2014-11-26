@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using System.Threading;
 using ORC_Projekt.BL.Ocr;
+using ORC_Projekt.BL.PreProcessing;
 
 namespace ORC_Projekt.BL
 {
