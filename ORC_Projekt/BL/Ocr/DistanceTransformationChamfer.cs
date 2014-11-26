@@ -114,7 +114,11 @@ namespace ORC_Projekt.BL.Ocr
             }
             int pixelValue;
 
-            byte byteDistance = (byte)(0xff / (double)maxValue * distance);
+            byte byteDistance = 0;
+            if (distance != 0)
+            {
+                byteDistance = (byte)((150 / (double)maxValue * distance) + 105);
+            }
 
             pixelValue = unchecked((int)0xFF000000);
             pixelValue += byteDistance;
