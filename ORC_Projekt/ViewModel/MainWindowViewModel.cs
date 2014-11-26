@@ -77,9 +77,21 @@ namespace ORC_Projekt.ViewModel
             }
         }
 
-        public bool IsColoredDistanceTransformationSelected
+        public String CurrentStep
         {
             get
+            {
+                if (_ocrManager != null)
+                {
+                    return _ocrManager.CurrentStep;
+                }
+                return String.Empty;
+            }
+        }
+        
+        public bool IsColoredDistanceTransformationSelected
+        {
+            get 
             {
                 return _config.ShowDistanceTransformationColored;
             }
@@ -90,13 +102,13 @@ namespace ORC_Projekt.ViewModel
                     _config.ShowDistanceTransformationColored = value;
                     OnPropertyChanged("IsSelected");
 
-                    if (_ocrManager != null)
+                    if(_ocrManager != null)
                     {
                         _ocrManager.Config = _config;
                     }
                 }
             }
-        }
+            }
 
 
 
@@ -135,7 +147,7 @@ namespace ORC_Projekt.ViewModel
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
-            openFileDialog1.InitialDirectory = "c:\\";
+            //openFileDialog1.InitialDirectory = "c:\\";
             openFileDialog1.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"; ;
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;

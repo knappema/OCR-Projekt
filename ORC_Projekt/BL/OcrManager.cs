@@ -20,6 +20,7 @@ namespace ORC_Projekt.BL
         /// </summary>
         private Bitmap _currentWorkingImage;
         private string _resultText;
+        private string _currentStep;
         
 
         public OcrManager(string fileName, ConfigModel config)
@@ -71,6 +72,23 @@ namespace ORC_Projekt.BL
             }
         }
 
+        public String CurrentStep
+        {
+            get
+            {
+                return _currentStep;
+            }
+            private set
+            {
+                if (_currentStep != value)
+                {
+                    _currentStep = value;
+                    OnPropertyChanged("CurrentStep");
+                }
+            }
+        }
+
+
         public ConfigModel Config { get; set; }
 
 
@@ -105,9 +123,9 @@ namespace ORC_Projekt.BL
         {
 
             CurrentImage = BinarizationWrapper.Binarize(new Bitmap(CurrentImage));
-            ResultText = "Binary Image";
+            CurrentStep = "Binary Image";
             CurrentImage = ThinningWrapper.Thin(new Bitmap(CurrentImage));
-            ResultText = "Thinned Image";
+            CurrentStep = "Thinned Image";
             //CurrentImage = CharacterIsolation.VisualizeBoxing(new Bitmap(CurrentImage));
             //ResultText = "Boxed";
         }
@@ -122,6 +140,7 @@ namespace ORC_Projekt.BL
             var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage), Config.ShowDistanceTransformationColored);
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
+            CurrentStep = "Distance Transformation";
 
         }
 
