@@ -65,14 +65,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BL\BinarizationWrapper.cs" />
-    <Compile Include="BL\CharacterIsolation.cs" />
+    <Compile Include="BL\PreProcessing\BinarizationWrapper.cs" />
+    <Compile Include="BL\PreProcessing\CharacterIsolation.cs" />
     <Compile Include="BL\ConfigModel.cs" />
-    <Compile Include="BL\HelperFunctions.cs" />
+    <Compile Include="BL\PreProcessing\HelperFunctions.cs" />
     <Compile Include="BL\OcrManager.cs" />
     <Compile Include="BL\OcrManagerBase.cs" />
     <Compile Include="BL\Ocr\ChamferMatching.cs" />
-    <Compile Include="BL\ThinningWrapper.cs" />
+    <Compile Include="BL\PreProcessing\ThinningWrapper.cs" />
     <Compile Include="BL\Ocr\DistanceTransformationChamfer.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
