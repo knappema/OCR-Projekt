@@ -74,6 +74,7 @@
     <Compile Include="BL\OcrManagerBase.cs" />
     <Compile Include="BL\Ocr\ChamferMatching.cs" />
     <Compile Include="BL\PreProcessing\Otsu.cs" />
+    <Compile Include="BL\PreProcessing\ScaleWrapper.cs" />
     <Compile Include="BL\PreProcessing\ThinningWrapper.cs" />
     <Compile Include="BL\Ocr\DistanceTransformationChamfer.cs" />
     <Compile Include="Commands\RelayCommand.cs" />

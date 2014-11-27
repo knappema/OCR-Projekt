@@ -105,7 +105,7 @@ namespace ORC_Projekt.BL
         {
             Reset();
             PreProcessing();
-            Ocr();
+            //Ocr();
             PostProcessing();
         }
 
@@ -127,16 +127,22 @@ namespace ORC_Projekt.BL
             CurrentImage = BinarizationWrapper.Binarize(new Bitmap(_currentWorkingImage));
             _currentWorkingImage = CurrentImage;
             CurrentStep = "Binary Image";
-
+           
             CurrentImage = ThinningWrapper.Thin(new Bitmap(_currentWorkingImage));
             _currentWorkingImage = CurrentImage;
             CurrentStep = "Thinned Image";
+            HelperFunctions.SafeBitmapToDisk(CurrentImage);
 
             CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(new Bitmap(_currentWorkingImage));
             List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(new Bitmap(_currentWorkingImage));
             CurrentStep = "Boxed";
-            return chars;
-            return null;
+
+            HelperFunctions.SafeBitmapToDisk(CurrentImage);
+           
+            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
+            HelperFunctions.SafeBitmapsToDisk(scaledChars);
+                
+            return scaledChars;
         }
 
 

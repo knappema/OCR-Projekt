@@ -20,12 +20,14 @@ namespace ORC_Projekt.BL.PreProcessing
             int amoutOfPixels = 0;
 
             for (int y = 0; y < Bmp.Height; y++)
+            { 
                 for (int x = 0; x < Bmp.Width; x++)
                 {
                     grayScale = HelperFunctions.GetGrayScaleFromColor(Bmp.GetPixel(x, y));
                     grayScaleTotal += grayScale;
                     amoutOfPixels++;
                 }
+            }
             return (int)(grayScaleTotal / amoutOfPixels);
         }
 

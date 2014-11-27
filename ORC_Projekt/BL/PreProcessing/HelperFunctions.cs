@@ -12,5 +12,17 @@ namespace ORC_Projekt.BL.PreProcessing
         {
             return (int)((c.R + c.G + c.B) / 3);
         }
+        public static void SafeBitmapsToDisk(List<Bitmap> images)
+        {
+            int i = 1;
+            foreach(Bitmap image in images)
+            {
+                image.Save("image" + i++ + ".png");
+            }
+        }
+        public static void SafeBitmapToDisk(Bitmap image)
+        {
+            image.Save("image" + DateTime.Now.Second + ".png");
+        }
     }
 }
