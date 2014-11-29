@@ -23,6 +23,7 @@ namespace ORC_Projekt.ViewModel
         private readonly ICommand _cancelOcrCommand;
         private readonly ConfigModel _config;
         private OcrManager _ocrManager;
+        private OcrBackgroundworker _ocrWorker;
         private bool _isStartButtonVisible = true;
         private int _progressValue = 0;
 
@@ -228,15 +229,18 @@ namespace ORC_Projekt.ViewModel
         private void ExecuteStartOcr(object o)
         {
             IsStartButtonVisible = false;
-            _ocrManager.Start();
+            //_ocrManager.Start();
+            _ocrWorker.Start();
         }
 
         private void ExecuteResumeOcr(object o)
         {
+            _ocrWorker.Resume();
         }
 
         private void ExecuteCancelOcr(object o)
         {
+            _ocrWorker.Cancel();
         }
 
         #endregion
@@ -250,6 +254,9 @@ namespace ORC_Projekt.ViewModel
             _ocrManager = new OcrManager(fileName, _config);
             _ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
             OnPropertyChanged("OriginalImage");
+
+            _ocrWorker = new OcrBackgroundworker(_ocrManager);
+            _ocrWorker.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
         }
 
         private void PropertyHasChanged(object o, PropertyChangedEventArgs e)

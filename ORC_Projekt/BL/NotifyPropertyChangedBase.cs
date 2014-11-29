@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace ORC_Projekt.BL
 {
-    public abstract class OcrManagerBase : INotifyPropertyChanged
+    public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

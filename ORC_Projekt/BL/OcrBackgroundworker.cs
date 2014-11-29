@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace ORC_Projekt.BL
 {
-    class OcrBackgroundworker
+    class OcrBackgroundworker : NotifyPropertyChangedBase
     {
                 /// <summary>
         /// The backgroundworker object on which the time consuming operation shall be executed
@@ -15,23 +15,72 @@ namespace ORC_Projekt.BL
         private BackgroundWorker _worker;
         private OcrManager _manager;
 
+        private int _progressValue = 0;
+
         public OcrBackgroundworker(OcrManager manager)
         {
             _manager = manager;
             _worker = new BackgroundWorker();
-            _worker.DoWork += new DoWorkEventHandler(m_oWorker_DoWork);
-            _worker.ProgressChanged += new ProgressChangedEventHandler(m_oWorker_ProgressChanged);
-            _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_oWorker_RunWorkerCompleted);
+            _worker.DoWork += new DoWorkEventHandler(Worker_DoWork);
+            _worker.ProgressChanged += new ProgressChangedEventHandler(Worker_ProgressChanged);
+            _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Worker_RunWorkerCompleted);
             _worker.WorkerReportsProgress = true;
             _worker.WorkerSupportsCancellation = true;
         }
+
+        #region Properties
+
+        public int ProgressValue
+        {
+            get
+            {
+                return _progressValue;
+            }
+            set
+            {
+                if (_progressValue != value)
+                {
+                    _progressValue = value;
+                    OnPropertyChanged("ProgressValue");
+                }
+            }
+        }
+
+        #endregion
+
+
+        #region Publics
+
+        public void Start()
+        {
+            //Start the async operation here
+            _worker.RunWorkerAsync();
+        }
+
+        public void Cancel()
+        {
+            if (_worker.IsBusy)
+            {
+                //Stop/Cancel the async operation here
+                _worker.CancelAsync();
+            }
+        }
+
+        public void Resume()
+        {
+        }
+
+        #endregion
+
+
+        #region Privates
 
         /// <summary>
         /// On completed do the appropriate task
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void m_oWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             //If it was cancelled midway
             //if (e.Cancelled)
@@ -55,11 +104,10 @@ namespace ORC_Projekt.BL
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void m_oWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             //Here you play with the main UI thread
-            //progressBar1.Value = e.ProgressPercentage;
-            //lblStatus.Text = "Processing......" + progressBar1.Value.ToString() + "%";
+            ProgressValue = e.ProgressPercentage;
         }
 
         /// <summary>
@@ -68,15 +116,17 @@ namespace ORC_Projekt.BL
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void m_oWorker_DoWork(object sender, DoWorkEventArgs e)
+        void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             //NOTE : Never play with the UI thread here...
 
             //time consuming operation
-            for (int i = 0; i < 100; i++)
-            {
-                Thread.Sleep(100);
-                _worker.ReportProgress(i);
+            //for (int i = 0; i < 100; i++)
+            //{
+                //Thread.Sleep(100);
+
+                _manager.Start();
+                _worker.ReportProgress(50);
 
                 //If cancel button was pressed while the execution is in progress
                 //Change the state from cancellation ---> cancel'ed
@@ -87,29 +137,13 @@ namespace ORC_Projekt.BL
                     return;
                 }
 
-            }
+            //}
             
             //Report 100% completion on operation completed
             _worker.ReportProgress(100);
         }
 
-        private void btnStartAsyncOperation_Click(object sender, EventArgs e)
-        {
-        //    btnStartAsyncOperation.Enabled  = false;
-        //    btnCancel.Enabled               = true;
-            //Start the async operation here
-            _worker.RunWorkerAsync();
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            if (_worker.IsBusy)
-            {
-                //Stop/Cancel the async operation here
-                _worker.CancelAsync();
-            }
-        }
-
+        #endregion
 
     }
 }

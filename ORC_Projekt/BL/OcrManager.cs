@@ -6,10 +6,12 @@ using System.Drawing;
 using System.Threading;
 using ORC_Projekt.BL.Ocr;
 using ORC_Projekt.BL.PreProcessing;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace ORC_Projekt.BL
 {
-    public class OcrManager : OcrManagerBase
+    public class OcrManager : NotifyPropertyChangedBase
     {
         private readonly Bitmap _originalImage;
         /// <summary>
@@ -124,28 +126,26 @@ namespace ORC_Projekt.BL
         private List<Bitmap> PreProcessing()
         {
 
-            CurrentImage = BinarizationWrapper.Binarize(new Bitmap(_currentWorkingImage));
-            _currentWorkingImage = CurrentImage;
+            CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
+            SetCurrentWorkingImage(CurrentImage);
             CurrentStep = "Binary Image";
-           
-            CurrentImage = ThinningWrapper.Thin(new Bitmap(_currentWorkingImage));
-            _currentWorkingImage = CurrentImage;
-            CurrentStep = "Thinned Image";
-            HelperFunctions.SafeBitmapToDisk(CurrentImage);
 
-            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(new Bitmap(_currentWorkingImage));
-            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(new Bitmap(_currentWorkingImage));
+            CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
+            SetCurrentWorkingImage(CurrentImage);
+            CurrentStep = "Thinned Image";
+            SafeBitmapToDisk(CurrentImage);
+
+            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
+            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
             CurrentStep = "Boxed";
 
-            HelperFunctions.SafeBitmapToDisk(CurrentImage);
+            SafeBitmapToDisk(CurrentImage);
            
             List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
             HelperFunctions.SafeBitmapsToDisk(scaledChars);
                 
             return scaledChars;
         }
-
-
 
         /// <summary>
         /// All methods for (in the moment) one specific ocr 
@@ -167,6 +167,36 @@ namespace ORC_Projekt.BL
         }
 
        
+        #endregion
+
+
+        #region Dispatcher Methods
+
+        private void SetCurrentWorkingImage(Bitmap newCurrentImage)
+        {
+            DispatchIfNecessary(() =>
+            {
+                _currentWorkingImage = (Bitmap)CurrentImage.Clone();
+            });
+        }
+
+        private void SafeBitmapToDisk(Bitmap CurrentImage)
+        {
+            DispatchIfNecessary(() =>
+            {
+                HelperFunctions.SafeBitmapToDisk(CurrentImage);
+            });
+        }
+
+        private void DispatchIfNecessary(Action action)
+        {
+            var dispatcher = Application.Current.Dispatcher;
+            if (!dispatcher.CheckAccess())
+                dispatcher.Invoke(action);
+            else
+                action.Invoke();
+        }
+
         #endregion
     }
 }

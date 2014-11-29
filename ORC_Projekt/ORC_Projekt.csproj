@@ -72,7 +72,7 @@
     <Compile Include="BL\ConfigModel.cs" />
     <Compile Include="BL\PreProcessing\HelperFunctions.cs" />
     <Compile Include="BL\OcrManager.cs" />
-    <Compile Include="BL\OcrManagerBase.cs" />
+    <Compile Include="BL\NotifyPropertyChangedBase.cs" />
     <Compile Include="BL\Ocr\ChamferMatching.cs" />
     <Compile Include="BL\PreProcessing\Otsu.cs" />
     <Compile Include="BL\PreProcessing\ScaleWrapper.cs" />
