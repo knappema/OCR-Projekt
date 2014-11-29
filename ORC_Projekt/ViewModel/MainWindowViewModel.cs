@@ -19,13 +19,19 @@ namespace ORC_Projekt.ViewModel
     {
         private readonly ICommand _selectFileCommand;
         private readonly ICommand _startOcrCommand;
+        private readonly ICommand _resumeOcrCommand;
+        private readonly ICommand _cancelOcrCommand;
         private readonly ConfigModel _config;
         private OcrManager _ocrManager;
+        private bool _isStartButtonVisible = true;
+        private int _progressValue = 0;
 
         public MainWindowViewModel()
         {
             _selectFileCommand = new RelayCommand(ExecuteSelectFile, CanExecuteSelectFile);
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
+            _resumeOcrCommand = new RelayCommand(ExecuteResumeOcr);
+            _cancelOcrCommand = new RelayCommand(ExecuteCancelOcr);
             _config = new ConfigModel();
         }
 
@@ -108,9 +114,39 @@ namespace ORC_Projekt.ViewModel
                     }
                 }
             }
+        }
+
+        public bool IsStartButtonVisible
+        {
+            get
+            {
+                return _isStartButtonVisible;
             }
+            set
+            {
+                if (_isStartButtonVisible != value)
+                {
+                    _isStartButtonVisible = value;
+                    OnPropertyChanged("IsStartButtonVisible");
+                }
+            }
+        }
 
-
+        public int ProgressValue
+        {
+            get
+            {
+                return _progressValue;
+            }
+            set
+            {
+                if (_progressValue != value)
+                {
+                    _progressValue = value;
+                    OnPropertyChanged("ProgressValue");
+                }
+            }
+        }
 
         #endregion
 
@@ -132,6 +168,21 @@ namespace ORC_Projekt.ViewModel
             }
         }
 
+        public ICommand ResumeOcrCommand
+        {
+            get
+            {
+                return _resumeOcrCommand;
+            }
+        }
+
+        public ICommand CancelOcrCommand
+        {
+            get
+            {
+                return _cancelOcrCommand;
+            }
+        }
 
         #endregion
 
@@ -176,7 +227,16 @@ namespace ORC_Projekt.ViewModel
 
         private void ExecuteStartOcr(object o)
         {
+            IsStartButtonVisible = false;
             _ocrManager.Start();
+        }
+
+        private void ExecuteResumeOcr(object o)
+        {
+        }
+
+        private void ExecuteCancelOcr(object o)
+        {
         }
 
         #endregion

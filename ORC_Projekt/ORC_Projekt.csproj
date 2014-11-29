@@ -66,6 +66,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BL\OcrBackgroundworker.cs" />
     <Compile Include="BL\PreProcessing\BinarizationWrapper.cs" />
     <Compile Include="BL\PreProcessing\CharacterIsolationWrapper.cs" />
     <Compile Include="BL\ConfigModel.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
+    <Compile Include="View\Converter\BooleanToVisibilityConverter.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
