@@ -66,6 +66,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BL\CancelException.cs" />
     <Compile Include="BL\OcrBackgroundworker.cs" />
     <Compile Include="BL\PreProcessing\BinarizationWrapper.cs" />
     <Compile Include="BL\PreProcessing\CharacterIsolationWrapper.cs" />

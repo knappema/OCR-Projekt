@@ -8,6 +8,7 @@ using ORC_Projekt.BL.Ocr;
 using ORC_Projekt.BL.PreProcessing;
 using System.Windows;
 using System.Windows.Threading;
+using System.ComponentModel;
 
 namespace ORC_Projekt.BL
 {
@@ -24,7 +25,9 @@ namespace ORC_Projekt.BL
         private Bitmap _currentWorkingImage;
         private string _resultText;
         private string _currentStep;
-        
+        private BackgroundWorker _worker;
+        private ManualResetEvent _waitEvent;
+
 
         public OcrManager(string fileName, ConfigModel config)
         {
@@ -111,6 +114,19 @@ namespace ORC_Projekt.BL
             PostProcessing();
         }
 
+        /// <summary>
+        /// Starts the ocr.
+        /// </summary>
+        public void StartAsync(BackgroundWorker worker, ManualResetEvent waitEvent)
+        {
+            _worker = worker;
+            _waitEvent = waitEvent;
+            Reset();
+            PreProcessing();
+            //Ocr();
+            PostProcessing();
+        }
+
         #endregion
 
         #region Privates
@@ -118,6 +134,7 @@ namespace ORC_Projekt.BL
         private void Reset()
         {
             CurrentImage = new Bitmap(OriginalImage);
+            _currentWorkingImage = new Bitmap(OriginalImage);
         }
 
         /// <summary>
@@ -130,10 +147,16 @@ namespace ORC_Projekt.BL
             SetCurrentWorkingImage(CurrentImage);
             CurrentStep = "Binary Image";
 
+            _worker.ReportProgress(20);
+            WaitForResume();
+
             CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
             SetCurrentWorkingImage(CurrentImage);
             CurrentStep = "Thinned Image";
             SafeBitmapToDisk(CurrentImage);
+
+            _worker.ReportProgress(40);
+            WaitForResume();
 
             CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
             List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
@@ -143,6 +166,9 @@ namespace ORC_Projekt.BL
            
             List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
             HelperFunctions.SafeBitmapsToDisk(scaledChars);
+
+            _worker.ReportProgress(60);
+            WaitForResume();
                 
             return scaledChars;
         }
@@ -152,7 +178,8 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void Ocr()
         {
-            var dtc = new DistanceTransformationChamfer(new Bitmap(CurrentImage), Config.ShowDistanceTransformationColored);
+            SetCurrentWorkingImage(CurrentImage);
+            var dtc = new DistanceTransformationChamfer(_currentWorkingImage, Config.ShowDistanceTransformationColored);
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
             CurrentStep = "Distance Transformation";
@@ -195,6 +222,29 @@ namespace ORC_Projekt.BL
                 dispatcher.Invoke(action);
             else
                 action.Invoke();
+        }
+
+        #endregion
+
+        #region Thread
+
+        private void WaitForResume()
+        {
+            CancellationPending();
+
+            if (Config.ShowSteps == true)
+            {
+                _waitEvent.WaitOne();
+                _waitEvent.Reset();
+            }
+        }
+
+        private void CancellationPending()
+        {
+            if (_worker.CancellationPending)
+            {
+                throw new CancelException();
+            }
         }
 
         #endregion

@@ -16,6 +16,9 @@ namespace ORC_Projekt.BL
         private OcrManager _manager;
 
         private int _progressValue = 0;
+        private bool _isOcrStarted = false;
+
+        private ManualResetEvent _waitEvent = new ManualResetEvent(false); 
 
         public OcrBackgroundworker(OcrManager manager)
         {
@@ -46,6 +49,22 @@ namespace ORC_Projekt.BL
             }
         }
 
+        public bool IsOcrStarted
+        {
+            get
+            {
+                return _isOcrStarted;
+            }
+            set
+            {
+                if (_isOcrStarted != value)
+                {
+                    _isOcrStarted = value;
+                    OnPropertyChanged("IsOcrStarted");
+                }
+            }
+        }
+
         #endregion
 
 
@@ -68,6 +87,7 @@ namespace ORC_Projekt.BL
 
         public void Resume()
         {
+            _waitEvent.Set();
         }
 
         #endregion
@@ -82,21 +102,7 @@ namespace ORC_Projekt.BL
         /// <param name="e"></param>
         void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //If it was cancelled midway
-            //if (e.Cancelled)
-            //{
-            //    lblStatus.Text = "Task Cancelled.";
-            //}
-            //else if (e.Error != null)
-            //{
-            //    lblStatus.Text = "Error while performing background operation.";
-            //}
-            //else
-            //{
-            //    lblStatus.Text = "Task Completed...";
-            //}
-            //btnStartAsyncOperation.Enabled = true;
-            //btnCancel.Enabled = false;
+            IsOcrStarted = false;
         }
 
         /// <summary>
@@ -108,6 +114,10 @@ namespace ORC_Projekt.BL
         {
             //Here you play with the main UI thread
             ProgressValue = e.ProgressPercentage;
+            if (ProgressValue < 100)
+            {
+                IsOcrStarted = true;
+            }
         }
 
         /// <summary>
@@ -119,15 +129,14 @@ namespace ORC_Projekt.BL
         void Worker_DoWork(object sender, DoWorkEventArgs e)
         {
             //NOTE : Never play with the UI thread here...
+            _worker.ReportProgress(0);
 
-            //time consuming operation
-            //for (int i = 0; i < 100; i++)
-            //{
-                //Thread.Sleep(100);
-
-                _manager.Start();
-                _worker.ReportProgress(50);
-
+            try
+            {
+                _manager.StartAsync(_worker, _waitEvent);
+            }
+            catch (CancelException)
+            {
                 //If cancel button was pressed while the execution is in progress
                 //Change the state from cancellation ---> cancel'ed
                 if (_worker.CancellationPending)
@@ -136,11 +145,12 @@ namespace ORC_Projekt.BL
                     _worker.ReportProgress(0);
                     return;
                 }
+            }
 
-            //}
             
             //Report 100% completion on operation completed
             _worker.ReportProgress(100);
+            Thread.Sleep(2000);
         }
 
         #endregion

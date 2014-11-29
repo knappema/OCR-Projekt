@@ -68,6 +68,11 @@
                 <StackPanel Grid.Column="0"
                             Margin="0, 10"
                             HorizontalAlignment="Center">
+                    <CheckBox Content="show steps" 
+                              IsChecked="{Binding ShowSteps, 
+                                              Mode=TwoWay, 
+                                              UpdateSourceTrigger=PropertyChanged, 
+                                              IsAsync=True}"/>
                     <CheckBox Content="show colored DistanceTransformation" 
                               IsChecked="{Binding IsColoredDistanceTransformationSelected, 
                                               Mode=TwoWay, 
@@ -78,19 +83,19 @@
                             HorizontalAlignment="Center">
                     <Button Content="Start Process" 
                         Command="{Binding StartOcrCommand}" 
-                        Visibility="{Binding IsStartButtonVisible, Converter={StaticResource CollapsedIfFalse}}"
+                        Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfTrue}}"
                         Width="150" 
                         Height="30"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="Resume" 
                                 Command="{Binding ResumeOcrCommand}" 
-                                Visibility="{Binding IsStartButtonVisible, Converter={StaticResource CollapsedIfTrue}}"
+                                Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfFalse}}"
                                 Width="75" 
                                 Height="30"
                                 Margin="5,0"/>
                         <Button Content="Cancel" 
                                 Command="{Binding CancelOcrCommand}" 
-                                Visibility="{Binding IsStartButtonVisible, Converter={StaticResource CollapsedIfTrue}}"
+                                Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfFalse}}"
                                 Width="75" 
                                 Height="30"
                                 Margin="5,0"/>
@@ -100,7 +105,7 @@
                                  Minimum="0"
                                  Maximum="100"
                                  Value="{Binding ProgressValue}"
-                                 Visibility="{Binding IsStartButtonVisible, Converter={StaticResource HiddenIfTrue}}"/>
+                                 Visibility="{Binding IsOcrStarted, Converter={StaticResource HiddenIfFalse}}"/>
                     <StackPanel
                             Width="200">
                         <Label Content="Result Text"/>

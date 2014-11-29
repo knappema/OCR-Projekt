@@ -24,14 +24,13 @@ namespace ORC_Projekt.ViewModel
         private readonly ConfigModel _config;
         private OcrManager _ocrManager;
         private OcrBackgroundworker _ocrWorker;
-        private bool _isStartButtonVisible = true;
         private int _progressValue = 0;
 
         public MainWindowViewModel()
         {
             _selectFileCommand = new RelayCommand(ExecuteSelectFile, CanExecuteSelectFile);
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
-            _resumeOcrCommand = new RelayCommand(ExecuteResumeOcr);
+            _resumeOcrCommand = new RelayCommand(ExecuteResumeOcr, CanExecuteResumeOcr);
             _cancelOcrCommand = new RelayCommand(ExecuteCancelOcr);
             _config = new ConfigModel();
         }
@@ -107,7 +106,7 @@ namespace ORC_Projekt.ViewModel
                 if (_config.ShowDistanceTransformationColored != value)
                 {
                     _config.ShowDistanceTransformationColored = value;
-                    OnPropertyChanged("IsSelected");
+                    OnPropertyChanged("IsColoredDistanceTransformationSelected");
 
                     if(_ocrManager != null)
                     {
@@ -117,19 +116,15 @@ namespace ORC_Projekt.ViewModel
             }
         }
 
-        public bool IsStartButtonVisible
+        public bool IsOcrStarted
         {
             get
             {
-                return _isStartButtonVisible;
-            }
-            set
-            {
-                if (_isStartButtonVisible != value)
+                if (_ocrWorker != null)
                 {
-                    _isStartButtonVisible = value;
-                    OnPropertyChanged("IsStartButtonVisible");
+                    return _ocrWorker.IsOcrStarted;
                 }
+                return false;
             }
         }
 
@@ -137,19 +132,49 @@ namespace ORC_Projekt.ViewModel
         {
             get
             {
-                return _progressValue;
+                if (_ocrWorker != null)
+                {
+                    return _ocrWorker.ProgressValue;
+                }
+                return 0;
             }
             set
             {
-                if (_progressValue != value)
+                if (_ocrWorker != null)
                 {
-                    _progressValue = value;
-                    OnPropertyChanged("ProgressValue");
+                    if (_ocrWorker.ProgressValue != value)
+                    {
+                        _ocrWorker.ProgressValue = value;
+                        OnPropertyChanged("ProgressValue");
+                    }
                 }
             }
         }
 
+        public bool ShowSteps
+        {
+            get
+            {
+                return _config.ShowSteps;
+            }
+            set
+            {
+                if (_config.ShowSteps != value)
+                {
+                    _config.ShowSteps = value;
+                    OnPropertyChanged("ShowSteps");
+
+                    if (_ocrManager != null)
+                    {
+                        _ocrManager.Config = _config;
+                    }
+                }
+            }
+
+        }
+
         #endregion
+
 
         #region Commands
 
@@ -228,7 +253,6 @@ namespace ORC_Projekt.ViewModel
 
         private void ExecuteStartOcr(object o)
         {
-            IsStartButtonVisible = false;
             //_ocrManager.Start();
             _ocrWorker.Start();
         }
@@ -236,6 +260,11 @@ namespace ORC_Projekt.ViewModel
         private void ExecuteResumeOcr(object o)
         {
             _ocrWorker.Resume();
+        }
+
+        private bool CanExecuteResumeOcr(object o)
+        {
+            return ShowSteps;
         }
 
         private void ExecuteCancelOcr(object o)
