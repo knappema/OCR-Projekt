@@ -109,8 +109,11 @@ namespace ORC_Projekt.BL
         public void Start()
         {
             Reset();
-            PreProcessing();
-            //Ocr();
+            var list = PreProcessing();
+            foreach(var item in list)
+            {
+                Ocr(item);
+            }
             PostProcessing();
         }
 
@@ -122,8 +125,12 @@ namespace ORC_Projekt.BL
             _worker = worker;
             _waitEvent = waitEvent;
             Reset();
-            PreProcessing();
-            Ocr();
+            var list = PreProcessing();
+            for(int i = 0; i < list.Count; i++)
+            {
+                Ocr(list[i]);
+                Stop(50 + (int)(50 / (double)list.Count) * i);
+            }
             PostProcessing();
         }
 
@@ -147,14 +154,14 @@ namespace ORC_Projekt.BL
             SetCurrentWorkingImage(CurrentImage);
             CurrentStep = "Binary Image";
 
-            Stop(20);
+            Stop(15);
 
             CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
             SetCurrentWorkingImage(CurrentImage);
             CurrentStep = "Thinned Image";
             SafeBitmapToDisk(CurrentImage);
 
-            //Stop(40);
+            //Stop(30);
 
             //CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
             //List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
@@ -165,33 +172,33 @@ namespace ORC_Projekt.BL
             //List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
             //HelperFunctions.SafeBitmapsToDisk(scaledChars);
 
-            //Stop(60);
+            Stop(50);
 
             //return scaledChars;
-            return null;
+
+            var temp = new List<Bitmap>();
+            temp.Add(CurrentImage);
+            return temp;
         }
 
         /// <summary>
         /// All methods for (in the moment) one specific ocr 
         /// </summary>
-        private void Ocr()
+        private void Ocr(Bitmap item)
         {
             //SetCurrentWorkingImage(CurrentImage);
             //CurrentImage = OcrHelper.RemoveRed(_currentWorkingImage);
 
-            Stop(65);
 
-            SetCurrentWorkingImage(CurrentImage);
-            var dtc = new DistanceTransformationChamfer(_currentWorkingImage, Config.ShowDistanceTransformationColored);
+            var dtc = new DistanceTransformationChamfer(item, Config.ShowDistanceTransformationColored);
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
             CurrentStep = "Distance Transformation";
 
-            Stop(85);
 
             var cm = new ChamferMatching(distanceMap, Config);
             cm.Start();
-            ResultText = cm.ResultList[0].Value.ToString();
+            ResultText += cm.ResultList[0].Value.ToString();
             
 
         }
