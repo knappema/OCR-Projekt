@@ -78,6 +78,7 @@ namespace ORC_Projekt.BL
 
         public void Cancel()
         {
+            _waitEvent.Set();
             if (_worker.IsBusy)
             {
                 //Stop/Cancel the async operation here
@@ -136,6 +137,17 @@ namespace ORC_Projekt.BL
                 _manager.StartAsync(_worker, _waitEvent);
             }
             catch (CancelException)
+            {
+                //If cancel button was pressed while the execution is in progress
+                //Change the state from cancellation ---> cancel'ed
+                if (_worker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    _worker.ReportProgress(0);
+                    return;
+                }
+            }
+            catch (Exception)
             {
                 //If cancel button was pressed while the execution is in progress
                 //Change the state from cancellation ---> cancel'ed

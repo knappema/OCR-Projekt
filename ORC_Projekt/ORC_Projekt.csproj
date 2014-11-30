@@ -68,6 +68,8 @@
     </Compile>
     <Compile Include="BL\CancelException.cs" />
     <Compile Include="BL\OcrBackgroundworker.cs" />
+    <Compile Include="BL\Ocr\OcrHelper.cs" />
+    <Compile Include="BL\Ocr\Template.cs" />
     <Compile Include="BL\PreProcessing\BinarizationWrapper.cs" />
     <Compile Include="BL\PreProcessing\CharacterIsolationWrapper.cs" />
     <Compile Include="BL\ConfigModel.cs" />
