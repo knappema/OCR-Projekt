@@ -74,9 +74,11 @@ namespace ORC_Projekt.BL.Ocr
                                 }
                             }
                         }
-                        int currentDistance = (int)(currentPositionSum / foregroundPixelCount);
-                        absoluteMin = Math.Min(absoluteMin, currentDistance);
-
+                        if (foregroundPixelCount > 0)
+                        {
+                            int currentDistance = (int)(currentPositionSum / foregroundPixelCount);
+                            absoluteMin = Math.Min(absoluteMin, currentDistance);
+                        }
                     }
                 }
 
