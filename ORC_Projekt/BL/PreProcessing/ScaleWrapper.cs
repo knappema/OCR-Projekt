@@ -16,9 +16,26 @@ namespace ORC_Projekt.BL.PreProcessing
             foreach(Bitmap image in images)
             {
                 Bitmap scaledImage = resizeImage(image, Height);
+                scaledImage = squareImage(scaledImage);
                 scaledImages.Add(scaledImage);
             }
             return scaledImages;
+        }
+
+        private static Bitmap squareImage(Bitmap scaledImage)
+        {
+            int size = scaledImage.Height;
+            Bitmap squaredImage = new Bitmap(size, size);
+
+            Graphics g = Graphics.FromImage((Image)squaredImage);
+
+            SolidBrush b = new SolidBrush(Color.White);
+            g.FillRectangle(b, 0, 0, size,size);
+            g.DrawImage(scaledImage, (size - scaledImage.Width) / 2, 0);
+            
+            g.Dispose();
+
+            return (Bitmap)squaredImage;
         }
 
         private static Bitmap resizeImage(Bitmap imgToResize, int newHeight)

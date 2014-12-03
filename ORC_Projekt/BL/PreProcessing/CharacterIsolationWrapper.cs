@@ -106,7 +106,7 @@ namespace ORC_Projekt.BL.PreProcessing
         private static List<LetterBox> CalcLetterBoxes(Bitmap input, List<int> xCoordinatesOfWhiteColumns)
         {
             int minLetterWith = 3;
-            int boxOffset = 10;
+            int boxOffset = 5;
             List<LetterBox> boxes = new List<LetterBox>();
 
             if (!xCoordinatesOfWhiteColumns.Any())
