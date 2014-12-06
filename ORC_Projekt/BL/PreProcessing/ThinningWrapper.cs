@@ -13,7 +13,7 @@ namespace ORC_Projekt.BL.PreProcessing
         /// </summary>
         public static Bitmap Thin(Bitmap img)
         {
-            img = new Bitmap(img);
+            img = (Bitmap)img.Clone();
             bool[][] t = Image2Bool(img);
             t = ZhangSuenThinning(t);
             return Bool2Image(t);
@@ -26,7 +26,7 @@ namespace ORC_Projekt.BL.PreProcessing
         {
             int grayScale;
 
-            Bitmap bmp = new Bitmap(img);
+            Bitmap bmp = (Bitmap)img.Clone();
             bool[][] s = new bool[bmp.Height][];
             for (int y = 0; y < bmp.Height; y++)
             {

@@ -36,7 +36,7 @@ namespace ORC_Projekt.BL.PreProcessing
         /// </summary>
         public static Bitmap Binarize(Bitmap Bmp)
         {
-            Bmp = new Bitmap(Bmp);
+            Bmp = (Bitmap)Bmp.Clone();
             //int threshold = EstablishThreshold(Bmp);
             Otsu o = new Otsu();
             int threshold = o.getOtsuThreshold(Bmp);

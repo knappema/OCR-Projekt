@@ -19,7 +19,7 @@ namespace ORC_Projekt.BL.Ocr
         public DistanceTransformationChamfer(Bitmap binaryImage)
         {
             _inputImage = binaryImage;
-            _currentImage = new Bitmap(binaryImage);
+            _currentImage = (Bitmap)binaryImage.Clone();
             _currentDistanceMap = new uint[_inputImage.Width, _inputImage.Height];
         }
 

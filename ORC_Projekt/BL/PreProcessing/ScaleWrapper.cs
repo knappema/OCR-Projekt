@@ -9,29 +9,36 @@ namespace ORC_Projekt.BL.PreProcessing
 {
     class ScaleWrapper
     {   
-        public static List<Bitmap> scaleImages(List<Bitmap> images)
+        public static List<Bitmap> scaleImages(List<Bitmap> images, bool isTemplate = false)
         {
             int Height = 100;
             List<Bitmap> scaledImages = new List<Bitmap>();
             foreach(Bitmap image in images)
             {
                 Bitmap scaledImage = resizeImage(image, Height);
-                scaledImage = squareImage(scaledImage);
+                if (isTemplate)
+                {
+                    scaledImage = squareImage(scaledImage);
+                }
+                else
+                {
+                    scaledImage = squareImage(scaledImage, 10);
+                }
                 scaledImages.Add(scaledImage);
             }
             return scaledImages;
         }
 
-        private static Bitmap squareImage(Bitmap scaledImage)
+        private static Bitmap squareImage(Bitmap scaledImage, int frameSize = 0)
         {
-            int size = scaledImage.Height;
+            int size = scaledImage.Height + 2 * frameSize;
             Bitmap squaredImage = new Bitmap(size, size);
 
             Graphics g = Graphics.FromImage((Image)squaredImage);
 
             SolidBrush b = new SolidBrush(Color.White);
-            g.FillRectangle(b, 0, 0, size,size);
-            g.DrawImage(scaledImage, (size - scaledImage.Width) / 2, 0);
+            g.FillRectangle(b, 0, 0, size, size);
+            g.DrawImage(scaledImage, (size - scaledImage.Width) / 2, (size - scaledImage.Height) / 2);
             
             g.Dispose();
 

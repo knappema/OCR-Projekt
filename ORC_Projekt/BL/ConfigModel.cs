@@ -11,11 +11,14 @@ namespace ORC_Projekt.BL
         {
             ShowDistanceTransformationColored = false;
             ShowSteps = false;
+            CreateTemplate = false;
+
             TemplatePath = @"..\..\Template\";
         }
 
         public bool ShowDistanceTransformationColored { get; set; }
         public bool ShowSteps { get; set; }
+        public bool CreateTemplate { get; set; }
         public string TemplatePath { get; private set; }
     }
 }

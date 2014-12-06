@@ -68,6 +68,12 @@
                 <StackPanel Grid.Column="0"
                             Margin="0, 10"
                             HorizontalAlignment="Center">
+                    <CheckBox Content="create templates" 
+                              Margin="0,0,0,10"
+                              IsChecked="{Binding CreateTemplate, 
+                                              Mode=TwoWay, 
+                                              UpdateSourceTrigger=PropertyChanged, 
+                                              IsAsync=True}"/>
                     <CheckBox Content="show steps" 
                               IsChecked="{Binding ShowSteps, 
                                               Mode=TwoWay, 

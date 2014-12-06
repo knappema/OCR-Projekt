@@ -102,21 +102,6 @@ namespace ORC_Projekt.BL
         #endregion
 
         #region Publics
-
-        /// <summary>
-        /// Starts the ocr.
-        /// </summary>
-        public void Start()
-        {
-            Reset();
-            var list = PreProcessing();
-            foreach(var item in list)
-            {
-                Ocr(item);
-            }
-            PostProcessing();
-        }
-
         /// <summary>
         /// Starts the ocr.
         /// </summary>
@@ -125,21 +110,20 @@ namespace ORC_Projekt.BL
             _worker = worker;
             _waitEvent = waitEvent;
             Reset();
+
             var list = PreProcessing();
-            for(int i = 0; i < list.Count; i++)
-            {
-                Ocr(list[i]);
-                Stop(50 + (int)(50 / (double)list.Count) * i);
-            }
+            ForeachImage(list);
             PostProcessing();
         }
 
         #endregion
 
+
         #region Privates
 
         private void Reset()
         {
+            ResultText = String.Empty;
             CurrentImage = new Bitmap(OriginalImage);
             _currentWorkingImage = new Bitmap(OriginalImage);
         }
@@ -149,58 +133,93 @@ namespace ORC_Projekt.BL
         /// </summary>
         private List<Bitmap> PreProcessing()
         {
-
-            CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
-            SetCurrentWorkingImage(CurrentImage);
-            CurrentStep = "Binary Image";
-
+            Binarize();
             Stop(15);
 
-            CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
-            SetCurrentWorkingImage(CurrentImage);
-            CurrentStep = "Thinned Image";
-            SafeBitmapToDisk(CurrentImage);
-
+            Thin();
             Stop(30);
 
-            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
-            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
-            CurrentStep = "Boxed";
-
-            SafeBitmapToDisk(CurrentImage);
-
-            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
-            HelperFunctions.SafeBitmapsToDisk(scaledChars);
-
+            List<Bitmap> chars = Boxing();
+            List<Bitmap> scaledChars = Scale(chars);
             Stop(50);
 
             return scaledChars;
+        }
 
-            //var temp = new List<Bitmap>();
-            //temp.Add(CurrentImage);
-            //return temp;
+        private List<Bitmap> Scale(List<Bitmap> chars)
+        {
+            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars, Config.CreateTemplate);
+            SafeBitmapsToDisk(scaledChars);
+            return scaledChars;
+        }
+
+        private List<Bitmap> Boxing()
+        {
+            CurrentStep = "Boxed Image";
+            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
+            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
+            SafeBitmapToDisk(CurrentImage);
+            return chars;
+        }
+
+        private void Thin()
+        {
+            CurrentStep = "Thinned Image";
+            CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
+            SetCurrentWorkingImage(CurrentImage);
+            SafeBitmapToDisk(CurrentImage);
+        }
+
+        private void Binarize()
+        {
+            CurrentStep = "Binary Image";
+            CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
+            SetCurrentWorkingImage(CurrentImage);
+        }
+
+        private void ForeachImage(List<Bitmap> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                CurrentImage = list[i];
+                SetCurrentWorkingImage(CurrentImage);
+
+                Binarize();
+
+                Thin();
+
+                CurrentStep = "Boxed Image";
+
+                Stop(50 + (int)(50 / ((double)list.Count)) * i);
+
+                if (!Config.CreateTemplate)
+                {
+                    Ocr(_currentWorkingImage, list, i);
+                }
+                else
+                {
+                    SafeTamplateBitmapToDisk(CurrentImage);
+                }
+                Stop(50 + (int)(50 / ((double)list.Count)) * i);
+            }
         }
 
         /// <summary>
         /// All methods for (in the moment) one specific ocr 
         /// </summary>
-        private void Ocr(Bitmap item)
+        private void Ocr(Bitmap item, List<Bitmap> list, int i = 0)
         {
-            //SetCurrentWorkingImage(CurrentImage);
-            //CurrentImage = OcrHelper.RemoveRed(_currentWorkingImage);
-
-
+            CurrentStep = "Distance Transformation";
             var dtc = new DistanceTransformationChamfer(item, Config.ShowDistanceTransformationColored);
             var distanceMap = dtc.start();
             CurrentImage = dtc.CurrentImage;
-            CurrentStep = "Distance Transformation";
 
+            Stop(50 + (int)(50 / ((double)list.Count)) * i);
 
+            CurrentStep = "Chamfer Matching";
             var cm = new ChamferMatching(distanceMap, Config);
             cm.Start();
             ResultText += cm.ResultList[0].Value.ToString();
-            
-
         }
 
         /// <summary>
@@ -208,6 +227,7 @@ namespace ORC_Projekt.BL
         /// </summary>
         private void PostProcessing()
         {
+            // nothing yet
         }
 
        
@@ -224,11 +244,27 @@ namespace ORC_Projekt.BL
             });
         }
 
-        private void SafeBitmapToDisk(Bitmap CurrentImage)
+        private void SafeBitmapsToDisk(List<Bitmap> scaledChars)
         {
             DispatchIfNecessary(() =>
             {
-                HelperFunctions.SafeBitmapToDisk(CurrentImage);
+                HelperFunctions.SafeBitmapsToDisk(scaledChars);
+            });
+        }
+
+        private void SafeBitmapToDisk(Bitmap currentImage)
+        {
+            DispatchIfNecessary(() =>
+            {
+                HelperFunctions.SafeBitmapToDisk(currentImage);
+            });
+        }
+
+        private void SafeTamplateBitmapToDisk(Bitmap currentImage)
+        {
+            DispatchIfNecessary(() =>
+            {
+                HelperFunctions.SafeTemplateBitmapToDisk(currentImage);
             });
         }
 

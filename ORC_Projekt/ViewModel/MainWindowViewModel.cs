@@ -173,6 +173,28 @@ namespace ORC_Projekt.ViewModel
 
         }
 
+        public bool CreateTemplate
+        {
+            get
+            {
+                return _config.CreateTemplate;
+            }
+            set
+            {
+                if (_config.CreateTemplate != value)
+                {
+                    _config.CreateTemplate = value;
+                    OnPropertyChanged("CreateTemplate");
+
+                    if (_ocrManager != null)
+                    {
+                        _ocrManager.Config = _config;
+                    }
+                }
+            }
+
+        }
+
         #endregion
 
 
@@ -253,7 +275,6 @@ namespace ORC_Projekt.ViewModel
 
         private void ExecuteStartOcr(object o)
         {
-            //_ocrManager.Start();
             _ocrWorker.Start();
         }
 
@@ -283,6 +304,7 @@ namespace ORC_Projekt.ViewModel
             _ocrManager = new OcrManager(fileName, _config);
             _ocrManager.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);
             OnPropertyChanged("OriginalImage");
+            OnPropertyChanged("ResultText");
 
             _ocrWorker = new OcrBackgroundworker(_ocrManager);
             _ocrWorker.PropertyChanged += new PropertyChangedEventHandler(PropertyHasChanged);

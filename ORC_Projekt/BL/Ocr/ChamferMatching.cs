@@ -14,8 +14,8 @@ namespace ORC_Projekt.BL.Ocr
         private readonly ConfigModel _config;
         private readonly List<Template> _matchingList;
 
-        private int _originImageAdd = 40;
-        private int _tempaltImageAdd = 4;
+        private int _originImageAdd = 1;    // min = 1
+        private int _tempaltImageAdd = 1;   // min = 1
 
 
         
@@ -86,7 +86,7 @@ namespace ORC_Projekt.BL.Ocr
             }
 
             _matchingList.Sort((x, y) => x.Matching - y.Matching);
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < _matchingList.Count; i++)
             {
                 _resultList.Add(_matchingList[i]);
             }

@@ -72,7 +72,7 @@ namespace ORC_Projekt.BL.PreProcessing
         /// </summary>
         private static Bitmap drawBoxesIntoImage(List<LetterBox> boxes, Bitmap input)
         {
-            input = new Bitmap(input);
+            input = (Bitmap)input.Clone();
             foreach (LetterBox box in boxes)
             {
                 for (int x = box.x; x <= box.x + box.width; x++)
