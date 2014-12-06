@@ -199,6 +199,7 @@ namespace ORC_Projekt.BL
                 else
                 {
                     SafeTamplateBitmapToDisk(CurrentImage);
+                    Thread.Sleep(1100);
                 }
                 Stop(50 + (int)(50 / ((double)list.Count)) * i);
             }
