@@ -161,24 +161,24 @@ namespace ORC_Projekt.BL
             CurrentStep = "Thinned Image";
             SafeBitmapToDisk(CurrentImage);
 
-            //Stop(30);
+            Stop(30);
 
-            //CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
-            //List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
-            //CurrentStep = "Boxed";
+            CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
+            List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
+            CurrentStep = "Boxed";
 
-            //SafeBitmapToDisk(CurrentImage);
+            SafeBitmapToDisk(CurrentImage);
 
-            //List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
-            //HelperFunctions.SafeBitmapsToDisk(scaledChars);
+            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
+            HelperFunctions.SafeBitmapsToDisk(scaledChars);
 
             Stop(50);
 
-            //return scaledChars;
+            return scaledChars;
 
-            var temp = new List<Bitmap>();
-            temp.Add(CurrentImage);
-            return temp;
+            //var temp = new List<Bitmap>();
+            //temp.Add(CurrentImage);
+            //return temp;
         }
 
         /// <summary>
