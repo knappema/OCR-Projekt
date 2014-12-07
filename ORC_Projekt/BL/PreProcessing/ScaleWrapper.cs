@@ -18,20 +18,20 @@ namespace ORC_Projekt.BL.PreProcessing
                 Bitmap scaledImage = resizeImage(image, Height);
                 if (isTemplate)
                 {
-                    scaledImage = squareImage(scaledImage);
+                    scaledImage = squareImage(scaledImage, Height);
                 }
                 else
                 {
-                    scaledImage = squareImage(scaledImage, 10);
+                    scaledImage = squareImage(scaledImage, Height, 3);
                 }
                 scaledImages.Add(scaledImage);
             }
             return scaledImages;
         }
 
-        private static Bitmap squareImage(Bitmap scaledImage, int frameSize = 0)
+        private static Bitmap squareImage(Bitmap scaledImage, int newHeight, int frameSize = 0)
         {
-            int size = scaledImage.Height + 2 * frameSize;
+            int size = newHeight + 2 * frameSize;
             Bitmap squaredImage = new Bitmap(size, size);
 
             Graphics g = Graphics.FromImage((Image)squaredImage);
@@ -47,24 +47,33 @@ namespace ORC_Projekt.BL.PreProcessing
 
         private static Bitmap resizeImage(Bitmap imgToResize, int newHeight)
         {
-           int sourceWidth = imgToResize.Width;
-           int sourceHeight = imgToResize.Height;
+            int sourceWidth = imgToResize.Width;
+            int sourceHeight = imgToResize.Height;
 
-           float nPercent = 0;
+            float nPercent = 0;
 
-           nPercent = ((float)newHeight / (float)sourceHeight);
+            float nPercentVertical = ((float)newHeight / (float)sourceHeight);
+            float nPercentHorizontal = ((float)newHeight / (float)sourceWidth);
+            if (nPercentVertical < nPercentHorizontal)
+            {
+                nPercent = nPercentVertical;
+            }
+            else
+            {
+                nPercent = nPercentHorizontal;
+            }
 
-           int destWidth = (int)(sourceWidth * nPercent);
-           int destHeight = (int)(sourceHeight * nPercent);
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
 
-           Bitmap b = new Bitmap(destWidth, destHeight);
-           Graphics g = Graphics.FromImage((Image)b);
-           g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            Bitmap b = new Bitmap(destWidth, destHeight);
+            Graphics g = Graphics.FromImage((Image)b);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-           g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-           g.Dispose();
+            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            g.Dispose();
 
-           return (Bitmap)b;
+            return (Bitmap)b;
         }
     }
 }

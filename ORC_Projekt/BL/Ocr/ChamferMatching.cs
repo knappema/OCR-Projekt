@@ -14,7 +14,7 @@ namespace ORC_Projekt.BL.Ocr
         private readonly ConfigModel _config;
         private readonly List<Template> _matchingList;
 
-        private int _originImageAdd = 1;    // min = 1
+        private int _originImageAdd = 3;    // min = 1
         private int _tempaltImageAdd = 1;   // min = 1
 
 
@@ -50,10 +50,10 @@ namespace ORC_Projekt.BL.Ocr
                     throw new Exception("Tempate is bigger than distance map");
                 }
 
-                int absoluteMin = int.MaxValue;
-                for (int originX = 0; originX < (_distanceMap.GetLength(0) - currentTemplateImage.Width); originX += _originImageAdd)
+                double absoluteMin = double.MaxValue;
+                for (int originX = 0; originX < (_distanceMap.GetLength(0) - currentTemplateImage.Width + 1); originX += _originImageAdd)
                 {
-                    for (int originY = 0; originY < (_distanceMap.GetLength(1) - currentTemplateImage.Height); originY += _originImageAdd)
+                    for (int originY = 0; originY < (_distanceMap.GetLength(1) - currentTemplateImage.Height + 1); originY += _originImageAdd)
                     {
 
 
@@ -76,7 +76,7 @@ namespace ORC_Projekt.BL.Ocr
                         }
                         if (foregroundPixelCount > 0)
                         {
-                            int currentDistance = (int)(currentPositionSum / foregroundPixelCount);
+                            double currentDistance = (currentPositionSum / (double) foregroundPixelCount);
                             absoluteMin = Math.Min(absoluteMin, currentDistance);
                         }
                     }
@@ -85,7 +85,7 @@ namespace ORC_Projekt.BL.Ocr
                 template.Matching = absoluteMin;
             }
 
-            _matchingList.Sort((x, y) => x.Matching - y.Matching);
+            _matchingList.Sort((x, y) => Convert.ToInt32( x.Matching - y.Matching ));
             for (int i = 0; i < _matchingList.Count; i++)
             {
                 _resultList.Add(_matchingList[i]);

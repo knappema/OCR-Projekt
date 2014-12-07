@@ -16,6 +16,6 @@ namespace ORC_Projekt.BL.Ocr
 
         public string Path { get; private set; }
         public int Value { get; private set; }
-        public int Matching { get; set; }
+        public double Matching { get; set; }
     }
 }
