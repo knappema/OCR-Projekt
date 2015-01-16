@@ -23,6 +23,7 @@ namespace ORC_Projekt.BL
         /// Current image, which will be used for modifications
         /// </summary>
         private Bitmap _currentWorkingImage;
+        private Bitmap _currentTemplate;
         private string _resultText;
         private string _currentStep;
         private BackgroundWorker _worker;
@@ -35,6 +36,7 @@ namespace ORC_Projekt.BL
             _originalImage = new Bitmap(fileName);
             CurrentImage = new Bitmap(fileName);
             _currentWorkingImage = CurrentImage;
+            _currentTemplate = null;
         }
 
         #region Properties
@@ -111,9 +113,18 @@ namespace ORC_Projekt.BL
             _waitEvent = waitEvent;
             Reset();
 
-            var list = PreProcessing();
-            ForeachImage(list);
-            PostProcessing();
+            Processing();
+
+            //if (Config.CreateTemplate)
+            //{
+            //    CreateTemplates();
+            //}
+            //else
+            //{
+            //    var list = PreProcessing();
+            //    ForeachImage(list);
+            //    PostProcessing();
+            //}
         }
 
         #endregion
@@ -128,28 +139,91 @@ namespace ORC_Projekt.BL
             _currentWorkingImage = new Bitmap(OriginalImage);
         }
 
-        /// <summary>
-        /// All methods for pre-processing
-        /// </summary>
-        private List<Bitmap> PreProcessing()
+        private void Processing()
         {
             Binarize();
+            SetCurrentWorkingImage(CurrentImage);
             Stop(15);
 
             Thin();
-            Stop(30);
+            SetCurrentWorkingImage(CurrentImage);
+            Stop(15);
 
             List<Bitmap> chars = Boxing();
             List<Bitmap> scaledChars = Scale(chars);
-            Stop(50);
+            Stop(15);
 
-            return scaledChars;
+            bool createTemplatesLater = false;
+            List<Bitmap> transformedTemplates = new List<Bitmap>();
+            if (scaledChars.Count == 10 && Config.CreateTemplate)
+            {
+                createTemplatesLater = true;
+            }
+
+            foreach (var bitmap in scaledChars)
+            {
+                CurrentImage = bitmap;
+                SetCurrentWorkingImage(bitmap);
+                Stop(15);
+
+                Binarize();
+                SetCurrentWorkingImage(CurrentImage);
+                Stop(15);
+
+                Thin();
+                SetCurrentWorkingImage(CurrentImage);
+                Stop(15);
+
+
+                var distanceMap = DistanceTransformation();
+                Stop(15);
+
+                if (Config.CreateTemplate)
+                {
+                    if (!createTemplatesLater)
+                    {
+                        SafeTamplateBitmapToDisk(_currentTemplate);
+                    }
+                    else
+                    {
+                        transformedTemplates.Add((Bitmap)_currentTemplate.Clone());
+                    }
+                }
+                else
+                {
+                    string result = Matching(distanceMap);
+                    ResultText += result;
+                    Stop(15);
+                }
+            }
+
+            if (createTemplatesLater)
+            {
+                SafeTamplateListToDisk(transformedTemplates);
+            }
         }
+
+        ///// <summary>
+        ///// All methods for pre-processing
+        ///// </summary>
+        //private List<Bitmap> PreProcessing()
+        //{
+        //    Binarize();
+        //    Stop(15);
+
+        //    Thin();
+        //    Stop(30);
+
+        //    List<Bitmap> chars = Boxing();
+        //    List<Bitmap> scaledChars = Scale(chars);
+        //    Stop(50);
+
+        //    return scaledChars;
+        //}
 
         private List<Bitmap> Scale(List<Bitmap> chars)
         {
-            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars, Config.CreateTemplate);
-            SafeBitmapsToDisk(scaledChars);
+            List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
             return scaledChars;
         }
 
@@ -158,7 +232,6 @@ namespace ORC_Projekt.BL
             CurrentStep = "Boxed Image";
             CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
             List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
-            SafeBitmapToDisk(CurrentImage);
             return chars;
         }
 
@@ -166,70 +239,81 @@ namespace ORC_Projekt.BL
         {
             CurrentStep = "Thinned Image";
             CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
-            SetCurrentWorkingImage(CurrentImage);
-            SafeBitmapToDisk(CurrentImage);
         }
 
         private void Binarize()
         {
             CurrentStep = "Binary Image";
             CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
-            SetCurrentWorkingImage(CurrentImage);
         }
 
-        private void ForeachImage(List<Bitmap> list)
+        //private void ForeachImage(List<Bitmap> list)
+        //{
+        //    for (int i = 0; i < list.Count; i++)
+        //    {
+        //        CurrentImage = list[i];
+        //        SetCurrentWorkingImage(CurrentImage);
+
+        //        Binarize();
+
+        //        Thin();
+
+        //        CurrentStep = "Boxed Image";
+
+        //        Stop(50 + (int)(50 / ((double)list.Count)) * i);
+
+        //        if (!Config.CreateTemplate)
+        //        {
+        //            Ocr(_currentWorkingImage, list, i);
+        //        }
+        //        else
+        //        {
+        //            SafeTamplateBitmapToDisk(CurrentImage);
+        //            Thread.Sleep(1100);
+        //        }
+        //        Stop(50 + (int)(50 / ((double)list.Count)) * i);
+        //    }
+        //}
+
+        ///// <summary>
+        ///// All methods for (in the moment) one specific ocr 
+        ///// </summary>
+        //private void Ocr(Bitmap item, List<Bitmap> list, int i = 0)
+        //{
+        //    CurrentStep = "Distance Transformation";
+        //    var distanceMap = DistanceTransformation(item);
+
+        //    Stop(50 + (int)(50 / ((double)list.Count)) * i);
+
+        //    CurrentStep = "Chamfer Matching";
+        //    string result = Matching(distanceMap);
+        //    ResultText += result;
+        //}
+
+        private string Matching(uint[,] distanceMap)
         {
-            for (int i = 0; i < list.Count; i++)
-            {
-                CurrentImage = list[i];
-                SetCurrentWorkingImage(CurrentImage);
-
-                Binarize();
-
-                Thin();
-
-                CurrentStep = "Boxed Image";
-
-                Stop(50 + (int)(50 / ((double)list.Count)) * i);
-
-                if (!Config.CreateTemplate)
-                {
-                    Ocr(_currentWorkingImage, list, i);
-                }
-                else
-                {
-                    SafeTamplateBitmapToDisk(CurrentImage);
-                    Thread.Sleep(1100);
-                }
-                Stop(50 + (int)(50 / ((double)list.Count)) * i);
-            }
-        }
-
-        /// <summary>
-        /// All methods for (in the moment) one specific ocr 
-        /// </summary>
-        private void Ocr(Bitmap item, List<Bitmap> list, int i = 0)
-        {
-            CurrentStep = "Distance Transformation";
-            var dtc = new DistanceTransformationChamfer(item, Config.ShowDistanceTransformationColored);
-            var distanceMap = dtc.start();
-            CurrentImage = dtc.CurrentImage;
-
-            Stop(50 + (int)(50 / ((double)list.Count)) * i);
-
-            CurrentStep = "Chamfer Matching";
             var cm = new ChamferMatching(distanceMap, Config);
             cm.Start();
-            ResultText += cm.ResultList[0].Value.ToString();
+            string result = cm.ResultList[0].Value.ToString();
+            return result;
         }
 
-        /// <summary>
-        /// All methods for post-processing
-        /// </summary>
-        private void PostProcessing()
+        private uint[,] DistanceTransformation()
         {
-            // nothing yet
+            var dtc = new DistanceTransformationChamfer(_currentWorkingImage, Config.ShowDistanceTransformationColored, Config.CreateTemplate);
+            var distanceMap = dtc.start();
+            CurrentImage = dtc.CurrentImage;
+            _currentTemplate = dtc.CurrentTemplate;
+            return distanceMap;
         }
+
+        ///// <summary>
+        ///// All methods for post-processing
+        ///// </summary>
+        //private void PostProcessing()
+        //{
+        //    // nothing yet
+        //}
 
        
         #endregion
@@ -266,6 +350,14 @@ namespace ORC_Projekt.BL
             DispatchIfNecessary(() =>
             {
                 HelperFunctions.SafeTemplateBitmapToDisk(currentImage);
+            });
+        }
+
+        private void SafeTamplateListToDisk(List<Bitmap> currentList)
+        {
+            DispatchIfNecessary(() =>
+            {
+                HelperFunctions.SafeTemplateListToDisk(currentList);
             });
         }
 

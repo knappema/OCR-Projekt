@@ -50,10 +50,10 @@ namespace ORC_Projekt.BL.PreProcessing
             {
                 Bitmap croppedImage = input.Clone(new System.Drawing.Rectangle(box.x, box.y, box.width, box.height), input.PixelFormat);
                 chars.Add(croppedImage);
-                if (DEBUGMODE)
-                {
-                    croppedImage.Save("character at position x" + box.x.ToString() + "y" + box.y.ToString() + ".png");
-                }
+                //if (DEBUGMODE)
+                //{
+                //    croppedImage.Save("character at position x" + box.x.ToString() + "y" + box.y.ToString() + ".png");
+                //}
             }
             return chars;
         }

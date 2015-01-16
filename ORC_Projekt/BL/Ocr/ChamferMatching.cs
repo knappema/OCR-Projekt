@@ -9,20 +9,20 @@ namespace ORC_Projekt.BL.Ocr
 {
     class ChamferMatching
     {
-        private readonly uint[,] _distanceMap;
+        private readonly uint[,] _originalDistanceMap;
         private readonly List<Template> _resultList;
         private readonly ConfigModel _config;
         private readonly List<Template> _matchingList;
 
         private int _originImageAdd = 3;    // min = 1
-        private int _tempaltImageAdd = 1;   // min = 1
+        private int _imageAdd = 1;   // min = 1
 
 
         
 
         public ChamferMatching(uint[,] distanceMap, ConfigModel config)
         {
-            _distanceMap = distanceMap;
+            _originalDistanceMap = distanceMap;
             _resultList = new List<Template>();
             _config = config;
             _matchingList = new List<Template>();
@@ -44,53 +44,78 @@ namespace ORC_Projekt.BL.Ocr
             foreach (var template in _matchingList)
             {
                 Bitmap currentTemplateImage = new Bitmap(template.Path);
+                uint[,] currentTemplateDistanceMap = OcrHelper.GetDistanceMap(currentTemplateImage);
 
-                if (currentTemplateImage.Height > _distanceMap.GetLength(1) || currentTemplateImage.Width > _distanceMap.GetLength(0))
-                {
-                    throw new Exception("Tempate is bigger than distance map");
-                }
+                // Matching Original with Template
+                var absoluteMin = TemplateOnOriginalMatching(currentTemplateDistanceMap);
+                template.OriginalWithTemplateMatching = absoluteMin;
 
-                double absoluteMin = double.MaxValue;
-                for (int originX = 0; originX < (_distanceMap.GetLength(0) - currentTemplateImage.Width + 1); originX += _originImageAdd)
-                {
-                    for (int originY = 0; originY < (_distanceMap.GetLength(1) - currentTemplateImage.Height + 1); originY += _originImageAdd)
-                    {
+                // Matching Template with Original
+                var absoluteMin2 = OriginalOnTemplateMatching(currentTemplateDistanceMap);
+                template.TemplateWithOriginalMatching = absoluteMin2;
 
-
-                        // iterate over distance map
-                        long currentPositionSum = 0;
-                        long foregroundPixelCount = 0;
-                        int black = Color.Black.ToArgb();
-
-                        for (int x = 0; x < currentTemplateImage.Width; x += _tempaltImageAdd)
-                        {
-                            for (int y = 0; y < currentTemplateImage.Height; y += _tempaltImageAdd)
-                            {
-                                var currentPixel = currentTemplateImage.GetPixel(x, y).ToArgb();
-                                if (currentPixel == black)
-                                {
-                                    foregroundPixelCount++;
-                                    currentPositionSum += _distanceMap[x + originX, y + originY];
-                                }
-                            }
-                        }
-                        if (foregroundPixelCount > 0)
-                        {
-                            double currentDistance = (currentPositionSum / (double) foregroundPixelCount);
-                            absoluteMin = Math.Min(absoluteMin, currentDistance);
-                        }
-                    }
-                }
-
-                template.Matching = absoluteMin;
+                //  Result = Average of matchings
+                template.ResultMatching = (template.OriginalWithTemplateMatching + template.TemplateWithOriginalMatching) / 2.0;
             }
 
-            _matchingList.Sort((x, y) => Convert.ToInt32( x.Matching - y.Matching ));
+            _matchingList.Sort((x, y) => Convert.ToInt32(x.ResultMatching - y.ResultMatching));
             for (int i = 0; i < _matchingList.Count; i++)
             {
                 _resultList.Add(_matchingList[i]);
             }
 
+        }
+
+        private double TemplateOnOriginalMatching(uint[,] currentTemplateImage)
+        {
+            if (currentTemplateImage.GetLength(1) != _originalDistanceMap.GetLength(1) || currentTemplateImage.GetLength(0) != _originalDistanceMap.GetLength(0))
+            {
+                throw new Exception("Tempate is unequal to original image");
+            }
+
+            double currentDistance = DistanceMatching(currentTemplateImage, _originalDistanceMap);
+
+            return currentDistance;
+        }
+
+        private double OriginalOnTemplateMatching(uint[,] currentTemplateImage)
+        {
+            if (currentTemplateImage.GetLength(1) != _originalDistanceMap.GetLength(1) || currentTemplateImage.GetLength(0) != _originalDistanceMap.GetLength(0))
+            {
+                throw new Exception("Original image is unequal to template");
+            }
+
+            double currentDistance = DistanceMatching(_originalDistanceMap, currentTemplateImage);
+
+            return currentDistance;
+        }
+
+        private double DistanceMatching(uint[,] template, uint[,] distanceMap)
+        {
+            double currentDistance = double.MaxValue;
+
+            // iterate over distance map
+            long currentSum = 0;
+            long foregroundPixelCount = 0;
+            uint black = 0; // black
+
+            for (int x = 0; x < template.GetLength(0); x += _imageAdd)
+            {
+                for (int y = 0; y < template.GetLength(1); y += _imageAdd)
+                {
+                    var currentPixel = template[x, y];
+                    if (currentPixel == black)
+                    {
+                        foregroundPixelCount++;
+                        currentSum += distanceMap[x, y];
+                    }
+                }
+            }
+            if (foregroundPixelCount > 0)
+            {
+                currentDistance = (currentSum / (double)foregroundPixelCount);
+            }
+            return currentDistance;
         }
 
         #endregion
@@ -106,7 +131,7 @@ namespace ORC_Projekt.BL.Ocr
                 var fileName = Path.GetFileNameWithoutExtension(path);
                 var parts = fileName.Split(new string[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
 
-                _matchingList.Add(new Template(path, int.Parse(parts[0])));
+                _matchingList.Add(new Template(path, int.Parse(parts[1])));
             }
         }
 

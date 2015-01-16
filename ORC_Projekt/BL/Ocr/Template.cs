@@ -11,11 +11,15 @@ namespace ORC_Projekt.BL.Ocr
         {
             Path = path;
             Value = value;
-            Matching = int.MaxValue;
+            OriginalWithTemplateMatching = int.MaxValue;
+            TemplateWithOriginalMatching = int.MaxValue;
+            ResultMatching = int.MaxValue;
         }
 
         public string Path { get; private set; }
         public int Value { get; private set; }
-        public double Matching { get; set; }
+        public double OriginalWithTemplateMatching { get; set; }
+        public double TemplateWithOriginalMatching { get; set; }
+        public double ResultMatching { get; set; }
     }
 }

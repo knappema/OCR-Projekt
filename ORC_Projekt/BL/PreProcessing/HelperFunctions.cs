@@ -9,6 +9,9 @@ namespace ORC_Projekt.BL.PreProcessing
 {
     class HelperFunctions
     {
+        private static int counter = 0;
+
+
         public static int GetGrayScaleFromColor(Color c)
         {
             return (int)((c.R + c.G + c.B) / 3);
@@ -29,6 +32,7 @@ namespace ORC_Projekt.BL.PreProcessing
 
         public static void SafeTemplateBitmapToDisk(Bitmap image)
         {
+            Random rnd = new Random();
             string cur = Directory.GetCurrentDirectory();
             string path = Path.Combine(cur, "TemplateOutput");
             if (!Directory.Exists(path))
@@ -37,9 +41,28 @@ namespace ORC_Projekt.BL.PreProcessing
                 DirectoryInfo di = Directory.CreateDirectory(path);
             }
 
-            path = Path.Combine(path, String.Format("image{0}.png", DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss")));
+            path = Path.Combine(path, String.Format("template_X_{0}.png", rnd.Next() + counter++));
             image.Save(path);
             
+        }
+
+        public static void SafeTemplateListToDisk(List<Bitmap> list)
+        {
+            int i = 0;
+            foreach (var image in list)
+            {
+                Random rnd = new Random();
+                string cur = Directory.GetCurrentDirectory();
+                string path = Path.Combine(cur, "TemplateOutput");
+                if (!Directory.Exists(path))
+                {
+                    // Try to create the directory.
+                    DirectoryInfo di = Directory.CreateDirectory(path);
+                }
+
+                path = Path.Combine(path, String.Format("template_{0}_{1}.png", i++, rnd.Next() + (++counter)));
+                image.Save(path);
+            }
         }
     }
 }
