@@ -55,15 +55,21 @@ namespace ORC_Projekt.BL.Ocr
                 template.TemplateWithOriginalMatching = absoluteMin2;
 
                 //  Result = Average of matchings
-                template.ResultMatching = (template.OriginalWithTemplateMatching + template.TemplateWithOriginalMatching) / 2.0;
+                template.Average = (template.OriginalWithTemplateMatching + template.TemplateWithOriginalMatching) / 2.0;
+                template.Differenz = (Math.Abs(template.OriginalWithTemplateMatching - template.TemplateWithOriginalMatching) + template.Average) / 2.0;
             }
 
-            _matchingList.Sort((x, y) => Convert.ToInt32(x.ResultMatching - y.ResultMatching));
-            for (int i = 0; i < _matchingList.Count; i++)
-            {
-                _resultList.Add(_matchingList[i]);
-            }
+            var tempList = new List<Template>(_matchingList.OrderBy(x => x.Average));
+            var tempList2 = new List<Template>(tempList.OrderBy(x => x.Differenz));
 
+            //_matchingList.Sort((x, y) => Convert.ToInt32(x.Average - y.Average));
+            //_matchingList.Sort((x, y) => Convert.ToInt32(x.Differenz - y.Differenz));
+            //for (int i = 0; i < _matchingList.Count; i++)
+            //{
+            //    _resultList.Add(_matchingList[i]);
+            //}
+
+            _resultList.AddRange(tempList2);
         }
 
         private double TemplateOnOriginalMatching(uint[,] currentTemplateImage)
@@ -107,7 +113,8 @@ namespace ORC_Projekt.BL.Ocr
                     if (currentPixel == black)
                     {
                         foregroundPixelCount++;
-                        currentSum += distanceMap[x, y];
+                        currentSum += distanceMap[x, y] * distanceMap[x, y] * distanceMap[x, y] / 10; //*distanceMap[x, y];
+                        //currentSum += (long)((Math.Pow(2.0, distanceMap[x, y] * 0.4) * 0.2) - 0.2); //*distanceMap[x, y];
                     }
                 }
             }

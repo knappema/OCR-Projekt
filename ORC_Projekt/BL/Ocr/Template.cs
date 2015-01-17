@@ -13,13 +13,15 @@ namespace ORC_Projekt.BL.Ocr
             Value = value;
             OriginalWithTemplateMatching = int.MaxValue;
             TemplateWithOriginalMatching = int.MaxValue;
-            ResultMatching = int.MaxValue;
+            Average = double.MaxValue;
+            Differenz = double.MaxValue;
         }
 
         public string Path { get; private set; }
         public int Value { get; private set; }
         public double OriginalWithTemplateMatching { get; set; }
         public double TemplateWithOriginalMatching { get; set; }
-        public double ResultMatching { get; set; }
+        public double Average { get; set; }
+        public double Differenz { get; set; }
     }
 }
