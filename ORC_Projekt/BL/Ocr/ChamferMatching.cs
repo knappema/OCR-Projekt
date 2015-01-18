@@ -46,31 +46,29 @@ namespace ORC_Projekt.BL.Ocr
                 Bitmap currentTemplateImage = new Bitmap(template.Path);
                 uint[,] currentTemplateDistanceMap = OcrHelper.GetDistanceMap(currentTemplateImage);
 
-                // Matching Original with Template
+                // Matching Template on Original
+                
                 var absoluteMin = TemplateOnOriginalMatching(currentTemplateDistanceMap);
-                template.OriginalWithTemplateMatching = absoluteMin;
+                template.TemplateOnOriginalMatching = absoluteMin;
 
-                // Matching Template with Original
+                // Matching Original on Template
                 var absoluteMin2 = OriginalOnTemplateMatching(currentTemplateDistanceMap);
-                template.TemplateWithOriginalMatching = absoluteMin2;
+                template.OriginalOnTemplateMatching = absoluteMin2;
 
                 //  Result = Average of matchings
-                template.Average = (template.OriginalWithTemplateMatching + template.TemplateWithOriginalMatching) / 2.0;
-                template.Differenz = (Math.Abs(template.OriginalWithTemplateMatching - template.TemplateWithOriginalMatching) + template.Average) / 2.0;
+                template.MatchingAverage = (template.OriginalOnTemplateMatching + template.TemplateOnOriginalMatching) / 2.0;
+                template.MatchingDistanceAverage = (Math.Abs(template.OriginalOnTemplateMatching - template.TemplateOnOriginalMatching) + template.MatchingAverage) / 2.0;
             }
 
-            var tempList = new List<Template>(_matchingList.OrderBy(x => x.Average));
-            var tempList2 = new List<Template>(tempList.OrderBy(x => x.Differenz));
+            var tmpList = new List<Template>(_matchingList.OrderBy(x => x.MatchingAverage));
+            var tmpList2 = new List<Template>(tmpList.OrderBy(x => x.MatchingDistanceAverage));
 
-            //_matchingList.Sort((x, y) => Convert.ToInt32(x.Average - y.Average));
-            //_matchingList.Sort((x, y) => Convert.ToInt32(x.Differenz - y.Differenz));
-            //for (int i = 0; i < _matchingList.Count; i++)
-            //{
-            //    _resultList.Add(_matchingList[i]);
-            //}
-
-            _resultList.AddRange(tempList2);
+            _resultList.AddRange(tmpList2);
         }
+
+        #endregion
+
+        #region Privates
 
         private double TemplateOnOriginalMatching(uint[,] currentTemplateImage)
         {
@@ -124,10 +122,6 @@ namespace ORC_Projekt.BL.Ocr
             }
             return currentDistance;
         }
-
-        #endregion
-
-        #region Privates
 
         private void GetTempaltes()
         {
