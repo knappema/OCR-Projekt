@@ -155,26 +155,29 @@ namespace ORC_Projekt.BL
 
         private List<Bitmap> Boxing()
         {
-            CurrentStep = "Boxed Image";
+            CurrentStep = "Boxing";
             CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
             List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
             SafeBitmapToDisk(CurrentImage);
             return chars;
+            CurrentStep = "Boxed Image";
         }
 
         private void Thin()
         {
-            CurrentStep = "Thinned Image";
+            CurrentStep = "Thinning";
             CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
             SetCurrentWorkingImage(CurrentImage);
             SafeBitmapToDisk(CurrentImage);
+            CurrentStep = "Thinned Image";
         }
 
         private void Binarize()
         {
-            CurrentStep = "Binary Image";
+            CurrentStep = "Binarize";
             CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
             SetCurrentWorkingImage(CurrentImage);
+            CurrentStep = "Binary Image";
         }
 
         private void ForeachImage(List<Bitmap> list)
@@ -231,7 +234,7 @@ namespace ORC_Projekt.BL
             // nothing yet
         }
 
-       
+
         #endregion
 
 
