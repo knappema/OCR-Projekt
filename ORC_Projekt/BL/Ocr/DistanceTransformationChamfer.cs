@@ -13,20 +13,24 @@ namespace ORC_Projekt.BL.Ocr
     {
         private Bitmap _inputImage;
         private Bitmap _currentImage;
+        private Bitmap _currentTemplate;
         private uint[,] _currentDistanceMap;
         private bool _showColored = false;
+        private bool _createTemplate = false;
 
         public DistanceTransformationChamfer(Bitmap binaryImage)
         {
             _inputImage = binaryImage;
             _currentImage = (Bitmap)binaryImage.Clone();
+            _currentTemplate = (Bitmap)binaryImage.Clone();
             _currentDistanceMap = new uint[_inputImage.Width, _inputImage.Height];
         }
 
-        public DistanceTransformationChamfer(Bitmap binaryImage, bool showColored)
+        public DistanceTransformationChamfer(Bitmap binaryImage, bool showColored, bool createTemplate)
             : this(binaryImage)
         {
             _showColored = showColored;
+            _createTemplate = createTemplate;
         }
 
 
@@ -37,6 +41,14 @@ namespace ORC_Projekt.BL.Ocr
             get
             {
                 return _currentImage;
+            }
+        }
+
+        public Bitmap CurrentTemplate
+        {
+            get
+            {
+                return _currentTemplate;
             }
         }
 
@@ -58,55 +70,28 @@ namespace ORC_Projekt.BL.Ocr
 
         private void DistanceTransformation()
         {
-            _currentDistanceMap = CreateDistanceMap(_inputImage);
+            _currentDistanceMap = OcrHelper.CreateNewDistanceMap(_inputImage);
 
             ApplyMlMatrix();
             ApplyMrMatrix();
 
-            UpdateCurrentBitmap(_currentDistanceMap);
-        }
+            UpdateCurrentImage(_currentDistanceMap);
 
-
-        private uint[,] CreateDistanceMap(Bitmap bitmap)
-        {
-            return GetGetDistanceMapFromBitmap(bitmap, GetDistanceMap);
-        }
-
-        private uint GetDistanceMap(int x, int y, Bitmap bitmap)
-        {
-            Color pixel = bitmap.GetPixel(x, y);
-            int pixelValue = pixel.ToArgb();
-            int v1 = pixelValue & 0x000000ff;
-            int v2 = (pixelValue & 0x0000ff00) >> 8;
-            int v3 = (pixelValue & 0x00ff0000) >> 16;
-
-            if (AreDifferent(v1, v2, v3))
+            if (_createTemplate)
             {
-                throw new Exception("DistanceTransformation: There is no binary image");
+                UpdateCurrentTemplate(_currentDistanceMap);
             }
-            if (v1 > 0xff)
-            {
-                throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", v1));
-            }
-
-            uint result = uint.MaxValue;
-            if (v1 == 0)
-            {
-                result = 0;
-            }
-
-            return result;
-        }
-
-        private bool AreDifferent(int v1, int v2, int v3)
-        {
-            return !(v1 == v2 && v2 == v3 && v3 == v1);
         }
 
 
-        private void UpdateCurrentBitmap(uint[,] map)
+        private void UpdateCurrentImage(uint[,] map)
         {
             ForeachPixel(_currentImage, map, DistanceToBitmap);
+        }
+
+        private void UpdateCurrentTemplate(uint[,] map)
+        {
+            ForeachPixel(_currentTemplate, map, DistanceToTemplate);
         }
 
         private Color DistanceToBitmap(int x, int y, Bitmap bitmap, uint[,] distanceMap, uint maxValue)
@@ -118,14 +103,22 @@ namespace ORC_Projekt.BL.Ocr
             }
             else
             {
-                pixelValue = pixelValueFromDistance(distanceMap[x, y], maxValue);
+                pixelValue = pixelValueFromDistanceWithPadding(distanceMap[x, y], maxValue);
             }
 
             Color newColor = Color.FromArgb(pixelValue);
             return newColor;
         }
 
-        private int pixelValueFromDistance(uint distance, uint maxValue)
+        private Color DistanceToTemplate(int x, int y, Bitmap bitmap, uint[,] distanceMap, uint maxValue)
+        {
+            int pixelValue = pixelValueFromDistance(distanceMap[x, y]);
+
+            Color newColor = Color.FromArgb(pixelValue);
+            return newColor;
+        }
+
+        private int pixelValueFromDistanceWithPadding(uint distance, uint maxValue)
         {
             if (distance > uint.MaxValue)
             {
@@ -137,6 +130,28 @@ namespace ORC_Projekt.BL.Ocr
             if (distance != 0)
             {
                 byteDistance = (byte)((150 / (double)maxValue * distance) + 105);
+            }
+
+            pixelValue = unchecked((int)0xFF000000);
+            pixelValue += byteDistance;
+            pixelValue += byteDistance << 8;
+            pixelValue += byteDistance << 16;
+
+            return pixelValue;
+        }
+
+        private int pixelValueFromDistance(uint distance)
+        {
+            if (distance > byte.MaxValue)
+            {
+                throw new Exception(string.Format("DistanceTransformation: Distance too great - {0}", distance));
+            }
+            int pixelValue;
+
+            byte byteDistance = 0;
+            if (distance != 0)
+            {
+                byteDistance = (byte)distance;
             }
 
             pixelValue = unchecked((int)0xFF000000);
@@ -246,20 +261,6 @@ namespace ORC_Projekt.BL.Ocr
                 }
             }
         }
-
-        private uint[,] GetGetDistanceMapFromBitmap(Bitmap bitmap, Func<int, int, Bitmap, uint> pixelModification)
-        {
-            var map = new uint[bitmap.Width, bitmap.Height];
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    map[x, y] = pixelModification(x, y, bitmap);
-                }
-            }
-            return map;
-        }    
-
 
         private void ApplyMlMatrix()
         {
