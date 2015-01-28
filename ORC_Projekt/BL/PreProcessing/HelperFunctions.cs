@@ -43,7 +43,28 @@ namespace ORC_Projekt.BL.PreProcessing
 
             path = Path.Combine(path, String.Format("template_X_{0}.png", rnd.Next() + counter++));
             image.Save(path);
-            
+        } 
+
+        public static bool CheckIfImagesAreBW(List<Bitmap> images)
+        {
+            foreach(Bitmap image in images)
+            {
+               if (!CheckIfImageIsBW(image))
+                   return false;
+            }
+            return true;
+        }
+
+
+        public static bool CheckIfImageIsBW(Bitmap image)
+        {
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
+                {
+                    if ((GetGrayScaleFromColor(image.GetPixel(x, y)) != 0) && (GetGrayScaleFromColor(image.GetPixel(x, y)) != 255))
+                        return false;
+                }
+            return true;
         }
 
         public static void SafeTemplateListToDisk(List<Bitmap> list)

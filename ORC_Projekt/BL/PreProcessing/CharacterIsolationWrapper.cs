@@ -105,7 +105,8 @@ namespace ORC_Projekt.BL.PreProcessing
         /// </summary>
         private static List<LetterBox> CalcLetterBoxes(Bitmap input, List<int> xCoordinatesOfWhiteColumns)
         {
-            int minLetterWith = 3;
+            int minLetterWith = 15;
+            int minLetterHeight = 50;
             int boxOffset = 5;
             List<LetterBox> boxes = new List<LetterBox>();
 
@@ -116,8 +117,9 @@ namespace ORC_Projekt.BL.PreProcessing
             }
 
             //calc x postion and width of the box
-            int previousX = 0;
-            for (int x = 0; x < input.Width; x++)
+            int lastWhiteColumn = xCoordinatesOfWhiteColumns[0];
+            int x = lastWhiteColumn;
+            while ( x < input.Width)
             {
                 if (!xCoordinatesOfWhiteColumns.Contains(x))
                 {
@@ -127,27 +129,30 @@ namespace ORC_Projekt.BL.PreProcessing
                         if (xCoordinatesOfWhiteColumns.Contains(i))
                             foundLetter = false;
                     }
-                    int index = xCoordinatesOfWhiteColumns.IndexOf(previousX);
-                    int nextX = xCoordinatesOfWhiteColumns[index + 1];
+                    int indexOflastWhiteColumn = xCoordinatesOfWhiteColumns.IndexOf(lastWhiteColumn);
+                    int nextWhiteColumn = xCoordinatesOfWhiteColumns[indexOflastWhiteColumn + 1];
 
-                    int width = (nextX - x);
-                    if ((x - boxOffset > 0) && ((nextX + boxOffset) <= input.Width))
+                    int width = (nextWhiteColumn - x);
+                    int boxX = x;
+                    if ((x - boxOffset > 0) && ((nextWhiteColumn + boxOffset) <= input.Width))
                     {
-                        x = x - boxOffset;
+                        boxX = x - boxOffset;
                         width += 2 * boxOffset;
                     }
 
                     if (foundLetter)
                     {
-                        LetterBox box = new LetterBox(x, 0, width, 0);
+                        LetterBox box = new LetterBox(boxX, 0, width, 0);
                         boxes.Add(box);
                     }
-                    x = nextX;
+                    x = nextWhiteColumn;
                     continue;
                 }
-                previousX = x;
+                lastWhiteColumn = x;
+                x++;
             }
 
+            List<LetterBox> boxesToRemoveBecauseHeightIsToSmall = new List<LetterBox>();
             // calcYAndHeight
             foreach (LetterBox box in boxes)
             {
@@ -155,11 +160,11 @@ namespace ORC_Projekt.BL.PreProcessing
                 int x2 = box.x + box.width;
                 int ymax = 0, ymin = input.Height;
 
-                for (int x = x1; x < x2; x++)
+                for (int currX = x1; currX < x2; currX++)
                 {
                     for (int y = 0; y < input.Height; y++)
                     {
-                        if (input.GetPixel(x, y).R == 0)
+                        if (input.GetPixel(currX, y).R == 0)
                         {
                             if (y > ymax)
                                 ymax = y;
@@ -177,6 +182,14 @@ namespace ORC_Projekt.BL.PreProcessing
                 }
                 box.y = ymin;
                 box.height = height;
+                if(height < minLetterHeight)
+                {
+                    boxesToRemoveBecauseHeightIsToSmall.Add(box);
+                }
+            }
+            foreach (LetterBox box in boxesToRemoveBecauseHeightIsToSmall)
+            {
+                boxes.Remove(box);
             }
             return boxes;
         }

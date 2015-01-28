@@ -61,7 +61,11 @@ namespace ORC_Projekt.BL.PreProcessing
 
             Bitmap b = new Bitmap(destWidth, destHeight);
             Graphics g = Graphics.FromImage((Image)b);
+
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            SolidBrush brush = new SolidBrush(Color.White);
+            g.FillRectangle(brush, 0, 0, destWidth, destHeight);
 
             g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
             g.Dispose();

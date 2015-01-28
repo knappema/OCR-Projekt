@@ -113,7 +113,7 @@ namespace ORC_Projekt.BL
             _waitEvent = waitEvent;
             Reset();
 
-            Processing();
+            OCR();
 
             //if (Config.CreateTemplate)
             //{
@@ -139,19 +139,22 @@ namespace ORC_Projekt.BL
             _currentWorkingImage = new Bitmap(OriginalImage);
         }
 
-        private void Processing()
+        private void OCR()
         {
             Binarize();
             SetCurrentWorkingImage(CurrentImage);
             Stop(10);
 
-            Thin();
-            SetCurrentWorkingImage(CurrentImage);
+            List<Bitmap> chars = Boxing();
             Stop(20);
 
-            List<Bitmap> chars = Boxing();
+            chars = Thin(chars);
+            Stop(20);
+
             List<Bitmap> scaledChars = Scale(chars);
-            Stop(30);
+            Stop(20);
+
+            bool bw = HelperFunctions.CheckIfImagesAreBW(chars);
 
             bool createTemplatesLater = false;
             List<Bitmap> transformedTemplates = new List<Bitmap>();
@@ -170,11 +173,6 @@ namespace ORC_Projekt.BL
                 Binarize();
                 SetCurrentWorkingImage(CurrentImage);
                 Stop((int)(70.0 / scaledChars.Count) * i);
-
-                Thin();
-                SetCurrentWorkingImage(CurrentImage);
-                Stop((int)(70.0 / scaledChars.Count) * i);
-
 
                 var distanceMap = DistanceTransformation();
                 Stop((int)(70.0 / scaledChars.Count) * i);
@@ -213,21 +211,33 @@ namespace ORC_Projekt.BL
 
         private List<Bitmap> Boxing()
         {
-            CurrentStep = "Boxed Image";
+            CurrentStep = "Boxing";
             CurrentImage = CharacterIsolationWrapper.VisualizeBoxing(_currentWorkingImage);
             List<Bitmap> chars = CharacterIsolationWrapper.IsolateCharacters(_currentWorkingImage);
             return chars;
         }
 
-        private void Thin()
+        private List<Bitmap> Thin(List<Bitmap> images)
         {
-            CurrentStep = "Thinned Image";
-            CurrentImage = ThinningWrapper.Thin(_currentWorkingImage);
+            CurrentStep = "Thining";
+            CurrentImage = ThinningWrapper.Thin(CurrentImage);
+            List<Bitmap> thinnedImages = new List<Bitmap>();
+            foreach(Bitmap image in images)
+            {
+                thinnedImages.Add(ThinningWrapper.Thin(image));
+            }
+            return thinnedImages;
+        }
+
+        private Bitmap Thin(Bitmap images)
+        {
+            CurrentStep = "Thining";
+            return ThinningWrapper.Thin(images);            
         }
 
         private void Binarize()
         {
-            CurrentStep = "Binary Image";
+            CurrentStep = "Binarize";
             CurrentImage = BinarizationWrapper.Binarize(_currentWorkingImage);
         }
 
