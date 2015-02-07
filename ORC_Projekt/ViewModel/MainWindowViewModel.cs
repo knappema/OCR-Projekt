@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.ComponentModel;
 using System.Windows.Interop;
 using System.Drawing;
+using ORC_Projekt.View;
 
 namespace ORC_Projekt.ViewModel
 {
@@ -24,7 +25,6 @@ namespace ORC_Projekt.ViewModel
         private readonly ConfigModel _config;
         private OcrManager _ocrManager;
         private OcrBackgroundworker _ocrWorker;
-        private int _progressValue = 0;
 
         public MainWindowViewModel()
         {
@@ -123,6 +123,18 @@ namespace ORC_Projekt.ViewModel
                 if (_ocrWorker != null)
                 {
                     return _ocrWorker.IsOcrStarted;
+                }
+                return false;
+            }
+        }
+
+        public bool IsOcrPaused
+        {
+            get
+            {
+                if (_ocrWorker != null)
+                {
+                    return _ocrWorker.IsOcrPaused;
                 }
                 return false;
             }
@@ -284,7 +296,7 @@ namespace ORC_Projekt.ViewModel
 
         private bool CanExecuteResumeOcr(object o)
         {
-            return ShowSteps;
+            return ShowSteps && IsOcrPaused;
         }
 
         private void ExecuteCancelOcr(object o)
@@ -311,6 +323,11 @@ namespace ORC_Projekt.ViewModel
 
         private void PropertyHasChanged(object o, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == "IsOcrPaused")
+            {
+                ((RelayCommand)_resumeOcrCommand).UpdateCanExecute();
+            }
+
             OnPropertyChanged(e.PropertyName);
         }
 

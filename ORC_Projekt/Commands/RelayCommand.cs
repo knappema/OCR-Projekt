@@ -17,6 +17,11 @@ namespace ORC_Projekt.Commands
             remove { CommandManager.RequerySuggested -= value; }
         }
 
+        public void UpdateCanExecute()
+        {
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         public RelayCommand(Action<object> execute)
             : this(execute, null)
         {

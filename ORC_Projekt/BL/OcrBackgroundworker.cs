@@ -17,6 +17,7 @@ namespace ORC_Projekt.BL
 
         private int _progressValue = 0;
         private bool _isOcrStarted = false;
+        private bool _isOcrPaused = false;
 
         private ManualResetEvent _waitEvent = new ManualResetEvent(false); 
 
@@ -65,6 +66,23 @@ namespace ORC_Projekt.BL
             }
         }
 
+        public bool IsOcrPaused
+        {
+            get
+            {
+                return _isOcrPaused;
+            }
+            set
+            {
+                if (_isOcrPaused != value)
+                {
+                    _isOcrPaused = value;
+                    OnPropertyChanged("IsOcrPaused");
+                }
+            }
+        }
+
+
         #endregion
 
 
@@ -88,6 +106,7 @@ namespace ORC_Projekt.BL
 
         public void Resume()
         {
+            IsOcrPaused = false;
             _waitEvent.Set();
         }
 
@@ -104,6 +123,7 @@ namespace ORC_Projekt.BL
         void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             IsOcrStarted = false;
+            IsOcrPaused = false;
         }
 
         /// <summary>
@@ -113,6 +133,7 @@ namespace ORC_Projekt.BL
         /// <param name="e"></param>
         void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            IsOcrPaused = true;
             //Here you play with the main UI thread
             ProgressValue = e.ProgressPercentage;
             if (ProgressValue < 100)

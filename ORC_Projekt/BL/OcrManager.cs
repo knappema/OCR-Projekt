@@ -141,6 +141,9 @@ namespace ORC_Projekt.BL
 
         private void OCR()
         {
+            CurrentStep = "Start";
+            Stop(0);
+
             Binarize();
             SetCurrentWorkingImage(CurrentImage);
             Stop(10);
@@ -149,12 +152,12 @@ namespace ORC_Projekt.BL
             Stop(20);
 
             chars = Thin(chars);
-            Stop(20);
+            Stop(30);
 
             List<Bitmap> scaledChars = Scale(chars);
-            Stop(20);
+            Stop(30);
 
-            bool bw = HelperFunctions.CheckIfImagesAreBW(chars);
+            //bool bw = HelperFunctions.CheckIfImagesAreBW(chars);
 
             bool createTemplatesLater = false;
             List<Bitmap> transformedTemplates = new List<Bitmap>();
@@ -168,14 +171,14 @@ namespace ORC_Projekt.BL
             {
                 CurrentImage = bitmap;
                 SetCurrentWorkingImage(bitmap);
-                Stop((int)(70.0 / scaledChars.Count) * i);
+                Stop(30 + (int)(70.0 / scaledChars.Count) * i);
 
                 Binarize();
                 SetCurrentWorkingImage(CurrentImage);
-                Stop((int)(70.0 / scaledChars.Count) * i);
+                Stop(30 + (int)(70.0 / scaledChars.Count) * i);
 
                 var distanceMap = DistanceTransformation();
-                Stop((int)(70.0 / scaledChars.Count) * i);
+                Stop(30 + (int)(70.0 / scaledChars.Count) * i);
 
                 if (Config.CreateTemplate)
                 {
@@ -192,7 +195,7 @@ namespace ORC_Projekt.BL
                 {
                     string result = Matching(distanceMap);
                     ResultText += result;
-                    Stop((int)(70.0 / scaledChars.Count) * i);
+                    Stop(30 + (int)(70.0 / scaledChars.Count) * i);
                 }
                 i++;
             }
@@ -201,10 +204,13 @@ namespace ORC_Projekt.BL
             {
                 SafeTamplateListToDisk(transformedTemplates);
             }
+
+            CurrentStep = "End";
         }
 
         private List<Bitmap> Scale(List<Bitmap> chars)
         {
+            CurrentStep = "Scaling";
             List<Bitmap> scaledChars = ScaleWrapper.scaleImages(chars);
             return scaledChars;
         }
