@@ -105,7 +105,7 @@ namespace ORC_Projekt.BL.PreProcessing
         /// </summary>
         private static List<LetterBox> CalcLetterBoxes(Bitmap input, List<int> xCoordinatesOfWhiteColumns)
         {
-            int minLetterWith = 15;
+            int minLetterWith = 5;
             int minLetterHeight = 50;
             int boxOffset = 5;
             List<LetterBox> boxes = new List<LetterBox>();
