@@ -341,6 +341,8 @@ namespace ORC_Projekt.BL
                 _waitEvent.WaitOne();
                 _waitEvent.Reset();
             }
+
+            CancellationPending();
         }
 
         private void CancellationPending()
