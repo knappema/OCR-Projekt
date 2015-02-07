@@ -12,6 +12,8 @@
         <converter:BooleanToVisibilityConverter x:Key="CollapsedIfTrue" TriggerValue="True" IsHidden="False"/>
         <!--Collapses control if boolean value is false-->
         <converter:BooleanToVisibilityConverter x:Key="CollapsedIfFalse" TriggerValue="False" IsHidden="False"/>
+        
+        <converter:BooleanInverter x:Key="Invert"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -69,17 +71,20 @@
                             Margin="0, 10"
                             HorizontalAlignment="Center">
                     <CheckBox Content="create templates" 
-                              Margin="0,0,0,10"
+                              Margin="0,0,0,10" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding CreateTemplate, 
-                                              Mode=TwoWay, 
+                                              Mode=TwoWay,
                                               UpdateSourceTrigger=PropertyChanged, 
                                               IsAsync=True}"/>
                     <CheckBox Content="show steps" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding ShowSteps, 
                                               Mode=TwoWay, 
                                               UpdateSourceTrigger=PropertyChanged, 
                                               IsAsync=True}"/>
                     <CheckBox Content="show colored DistanceTransformation" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding IsColoredDistanceTransformationSelected, 
                                               Mode=TwoWay, 
                                               UpdateSourceTrigger=PropertyChanged, 

@@ -238,8 +238,7 @@ namespace ORC_Projekt.ViewModel
 
         private bool CanExecuteSelectFile(object o)
         {
-            // TODO is ocr running ???
-            return true;
+            return !IsOcrStarted;
         }
 
         private void ExecuteSelectFile(object o)
