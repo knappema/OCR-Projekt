@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:ORC_Projekt.View.Converter"
-        Title="MainWindow" Height="800" Width="1200">
+        Title="OCR for Numbers" Height="800" Width="1200">
     <Window.Resources>
         <!--Hides control if boolean value is true-->
         <converter:BooleanToVisibilityConverter x:Key="HiddenIfTrue" TriggerValue="True" IsHidden="True"/>
@@ -53,7 +53,7 @@
                    Width="Auto" />
             </Border>
         </DockPanel>
-        <Button Content="SelectImage" 
+        <Button Content="Select Image" 
                 Command="{Binding SelectFileCommand}" 
                 Width="100" 
                 Margin="5" 
@@ -70,20 +70,20 @@
                 <StackPanel Grid.Column="0"
                             Margin="0, 10"
                             HorizontalAlignment="Center">
-                    <CheckBox Content="create templates" 
+                    <CheckBox Content="Create Templates" 
                               Margin="0,0,0,10" 
                               IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding CreateTemplate, 
                                               Mode=TwoWay,
                                               UpdateSourceTrigger=PropertyChanged, 
                                               IsAsync=True}"/>
-                    <CheckBox Content="show steps" 
+                    <CheckBox Content="Show Steps" 
                               IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding ShowSteps, 
                                               Mode=TwoWay, 
                                               UpdateSourceTrigger=PropertyChanged, 
                                               IsAsync=True}"/>
-                    <CheckBox Content="show colored DistanceTransformation" 
+                    <CheckBox Content="Show Colored DistanceTransformation" 
                               IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
                               IsChecked="{Binding IsColoredDistanceTransformationSelected, 
                                               Mode=TwoWay, 
@@ -119,7 +119,7 @@
                                  Visibility="{Binding IsOcrStarted, Converter={StaticResource HiddenIfFalse}}"/>
                     <StackPanel
                             Width="200">
-                        <Label Content="Result Text"/>
+                        <Label Content="Result Text / Number"/>
                         <Border BorderThickness="1"
                             BorderBrush="Black">
                             <TextBlock Text="{Binding ResultText}" 
