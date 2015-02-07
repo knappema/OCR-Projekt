@@ -31,7 +31,7 @@ namespace ORC_Projekt.ViewModel
             _selectFileCommand = new RelayCommand(ExecuteSelectFile, CanExecuteSelectFile);
             _startOcrCommand = new RelayCommand(ExecuteStartOcr, CanExecuteStartOcr);
             _resumeOcrCommand = new RelayCommand(ExecuteResumeOcr, CanExecuteResumeOcr);
-            _cancelOcrCommand = new RelayCommand(ExecuteCancelOcr);
+            _cancelOcrCommand = new RelayCommand(ExecuteCancelOcr, CanExecuteCancelOcr);
             _config = new ConfigModel();
         }
 
@@ -135,6 +135,18 @@ namespace ORC_Projekt.ViewModel
                 if (_ocrWorker != null)
                 {
                     return _ocrWorker.IsOcrPaused;
+                }
+                return false;
+            }
+        }
+
+        public bool IsOcrCanceling
+        {
+            get
+            {
+                if (_ocrWorker != null)
+                {
+                    return _ocrWorker.IsOcrCanceling;
                 }
                 return false;
             }
@@ -304,6 +316,11 @@ namespace ORC_Projekt.ViewModel
             _ocrWorker.Cancel();
         }
 
+        private bool CanExecuteCancelOcr(object o)
+        {
+            return !IsOcrCanceling;
+        }
+
         #endregion
 
 
@@ -323,7 +340,7 @@ namespace ORC_Projekt.ViewModel
 
         private void PropertyHasChanged(object o, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "IsOcrPaused")
+            if (e.PropertyName == "IsOcrPaused" || e.PropertyName == "IsOcrCanceling")
             {
                 ((RelayCommand)_resumeOcrCommand).UpdateCanExecute();
             }

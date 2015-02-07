@@ -18,6 +18,7 @@ namespace ORC_Projekt.BL
         private int _progressValue = 0;
         private bool _isOcrStarted = false;
         private bool _isOcrPaused = false;
+        private bool _isOcrCanceling = false;
 
         private ManualResetEvent _waitEvent = new ManualResetEvent(false); 
 
@@ -82,6 +83,22 @@ namespace ORC_Projekt.BL
             }
         }
 
+        public bool IsOcrCanceling
+        {
+            get
+            {
+                return _isOcrCanceling;
+            }
+            set
+            {
+                if (_isOcrCanceling != value)
+                {
+                    _isOcrCanceling = value;
+                    OnPropertyChanged("IsOcrCanceling");
+                }
+            }
+        }
+
 
         #endregion
 
@@ -101,6 +118,7 @@ namespace ORC_Projekt.BL
             {
                 //Stop/Cancel the async operation here
                 _worker.CancelAsync();
+                IsOcrCanceling = true;
             }
         }
 
@@ -124,6 +142,7 @@ namespace ORC_Projekt.BL
         {
             IsOcrStarted = false;
             IsOcrPaused = false;
+            IsOcrCanceling = false;
         }
 
         /// <summary>
