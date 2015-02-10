@@ -13,7 +13,7 @@ namespace ORC_Projekt.BL
             ShowSteps = false;
             CreateTemplate = false;
 
-            TemplatePath = @"..\..\Template\";
+            TemplatePath = @"..\Templates\";
         }
 
         public bool ShowDistanceTransformationColored { get; set; }
