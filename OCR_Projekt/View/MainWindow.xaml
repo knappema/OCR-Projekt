@@ -1,0 +1,148 @@
+﻿<Window x:Class="OCR_Projekt.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converter="clr-namespace:OCR_Projekt.View.Converter"
+        Title="OCR for Numbers" Height="800" Width="1200">
+    <Window.Resources>
+        <!--Hides control if boolean value is true-->
+        <converter:BooleanToVisibilityConverter x:Key="HiddenIfTrue" TriggerValue="True" IsHidden="True"/>
+        <!--Hides control if boolean value is false-->
+        <converter:BooleanToVisibilityConverter x:Key="HiddenIfFalse" TriggerValue="False" IsHidden="True"/>
+        <!--Collapses control if boolean value is true-->
+        <converter:BooleanToVisibilityConverter x:Key="CollapsedIfTrue" TriggerValue="True" IsHidden="False"/>
+        <!--Collapses control if boolean value is false-->
+        <converter:BooleanToVisibilityConverter x:Key="CollapsedIfFalse" TriggerValue="False" IsHidden="False"/>
+        
+        <converter:BooleanInverter x:Key="Invert"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="250*" />
+            <RowDefinition Height="40" />
+            <RowDefinition Height="135" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0" 
+                    Grid.Row="0">
+            <Label Content="Original Image" 
+                   DockPanel.Dock="Top"
+                   HorizontalAlignment="Center"/>
+            <Border BorderThickness="1"
+                    BorderBrush="Black">
+                <Image Source="{Binding OriginalImage}" 
+                   Height="Auto" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Width="Auto" />
+            </Border>
+        </DockPanel>
+        <DockPanel Grid.Column="1" 
+                    Grid.Row="0">
+            <Label Content="Current Image" 
+                   DockPanel.Dock="Top"
+                   HorizontalAlignment="Center"/>
+            <Border BorderThickness="1"
+                    BorderBrush="Black">
+                <Image Source="{Binding CurrentImage}"
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center" 
+                   Height="Auto" 
+                   Width="Auto" />
+            </Border>
+        </DockPanel>
+        <Button Content="Select Image" 
+                Command="{Binding SelectFileCommand}" 
+                Width="100" 
+                Margin="5" 
+                Grid.Row="1"
+                Grid.Column="0"/>
+        <Grid Grid.ColumnSpan="2" 
+              Grid.Row="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0"
+                            Margin="0, 10"
+                            HorizontalAlignment="Center">
+                    <CheckBox Content="Create Templates" 
+                              Margin="0,0,0,10" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
+                              IsChecked="{Binding CreateTemplate, 
+                                              Mode=TwoWay,
+                                              UpdateSourceTrigger=PropertyChanged, 
+                                              IsAsync=True}"/>
+                    <CheckBox Content="Show Steps" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
+                              IsChecked="{Binding ShowSteps, 
+                                              Mode=TwoWay, 
+                                              UpdateSourceTrigger=PropertyChanged, 
+                                              IsAsync=True}"/>
+                    <CheckBox Content="Show Colored DistanceTransformation" 
+                              IsEnabled="{Binding IsOcrStarted, Converter={StaticResource Invert}}"
+                              IsChecked="{Binding IsColoredDistanceTransformationSelected, 
+                                              Mode=TwoWay, 
+                                              UpdateSourceTrigger=PropertyChanged, 
+                                              IsAsync=True}"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1"
+                            HorizontalAlignment="Center">
+                    <Button Content="Start Process" 
+                        Command="{Binding StartOcrCommand}" 
+                        Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfTrue}}"
+                        Width="150" 
+                        Height="30"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Resume" 
+                                Command="{Binding ResumeOcrCommand}" 
+                                Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfFalse}}"
+                                Width="75" 
+                                Height="30"
+                                Margin="5,0"/>
+                        <Button Content="Cancel" 
+                                Command="{Binding CancelOcrCommand}" 
+                                Visibility="{Binding IsOcrStarted, Converter={StaticResource CollapsedIfFalse}}"
+                                Width="75" 
+                                Height="30"
+                                Margin="5,0"/>
+                    </StackPanel>
+                    <ProgressBar Height="20" 
+                                 Margin="0,5" 
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="{Binding ProgressValue}"
+                                 Visibility="{Binding IsOcrStarted, Converter={StaticResource HiddenIfFalse}}"/>
+                    <StackPanel
+                            Width="200">
+                        <Label Content="Result Text / Number"/>
+                        <Border BorderThickness="1"
+                            BorderBrush="Black">
+                            <TextBlock Text="{Binding ResultText}" 
+                                   FontSize="24"
+                                   Height="40" 
+                                   TextAlignment="Center" />
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="2"
+                            Margin="0, 10"
+                            Width="300"
+                            HorizontalAlignment="Center">
+                    <Label Content="Current Step"/>
+                    <Border BorderThickness="1"
+                            BorderBrush="Black">
+                        <TextBlock Text="{Binding CurrentStep}" 
+                                   FontSize="24"
+                                   Height="40" 
+                                   TextAlignment="Center" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
